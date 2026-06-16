@@ -463,6 +463,17 @@ module.exports = grammar({
         ".",
         //FIXME: not all statements are allowed in statement_block
         repeat($._statement),
+        repeat(seq(
+          kw("elseif"),
+          $._logical_expression,
+          ".",
+          repeat($._statement),
+        )),
+        optional(seq(
+          kw("else"),
+          ".",
+          repeat($._statement),
+        )),
         kw("endif"),
         "."
       ),
