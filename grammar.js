@@ -50,7 +50,14 @@ module.exports = grammar({
         $.include_statement,
         $.macro_include,
         $.raise_statement,
-        $.append_statement_obsolete
+        $.append_statement_obsolete,
+        $.sort_statement,
+        $.case_statement,
+        $.concatenate_statement,
+        $.condense_statement,
+        $.replace_statement,
+        $.delete_statement,
+        $.collect_statement
       ),
 
     class_declaration: $ =>
@@ -931,6 +938,87 @@ module.exports = grammar({
       ),
 
     raise_statement: $ => seq(kw("raise"), $.name, "."),
+
+    sort_statement: $ =>
+      seq(
+        kw("sort"),
+        $.name,
+        optional(
+          seq(
+            kw("by"),
+            repeat1(seq($.name, optional(choice(kw("ascending"), kw("descending")))))
+          )
+        ),
+        "."
+      ),
+
+    case_statement: $ =>
+      seq(
+        kw("case"),
+        $._general_expression_position,
+        ".",
+        repeat($.when_clause),
+        kw("endcase"),
+        "."
+      ),
+
+    when_clause: $ =>
+      seq(
+        kw("when"),
+        choice(kw("others"), repeat1($._general_expression_position)),
+        ".",
+        repeat($._implementation_statement)
+      ),
+
+    concatenate_statement: $ =>
+      seq(
+        kw("concatenate"),
+        repeat1($._data_object),
+        kw("into"),
+        $._data_object,
+        optional(seq(kw("separated"), kw("by"), $._general_expression_position)),
+        "."
+      ),
+
+    condense_statement: $ =>
+      seq(
+        kw("condense"),
+        $._data_object,
+        optional(seq(kw("no"), kw("gaps"))),
+        "."
+      ),
+
+    replace_statement: $ =>
+      seq(
+        kw("replace"),
+        optional(choice(kw("first"), kw("all"))),
+        optional(choice(kw("occurrences"), kw("occurrence"))),
+        optional(kw("of")),
+        $._general_expression_position,
+        kw("in"),
+        $._data_object,
+        kw("with"),
+        $._general_expression_position,
+        "."
+      ),
+
+    delete_statement: $ =>
+      seq(
+        kw("delete"),
+        choice(
+          seq($.name, kw("where"), $._logical_expression),
+          seq(
+            kw("adjacent"), kw("duplicates"), kw("from"), $.name,
+            optional(seq(kw("comparing"), repeat1($.name)))
+          ),
+          seq($.name, kw("index"), $._general_expression_position)
+        ),
+        "."
+      ),
+
+    collect_statement: $ =>
+      seq(kw("collect"), $.name, kw("into"), $.name, "."),
+
 
     _operand: $ => choice($._escaped_operand, $.name),
 
