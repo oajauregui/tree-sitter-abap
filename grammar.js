@@ -58,6 +58,8 @@ module.exports = grammar({
         $.replace_statement,
         $.delete_statement,
         $.collect_statement,
+        $.translate_statement,
+        $.split_statement,
       ),
 
     class_declaration: ($) =>
@@ -436,8 +438,8 @@ module.exports = grammar({
         kw("at"),
         alias($.name, $.itab),
         choice(
-          seq(kw("into"), alias($.name, $.result)),
-          seq(kw("assigning"), alias($.field_symbol_name, $.result)),
+          seq(kw("into"), choice($.inline_declaration, alias($.name, $.result))),
+          seq(kw("assigning"), choice($.inline_fs_declaration, alias($.field_symbol_name, $.result))),
         ),
         optional(
           seq(
@@ -594,7 +596,6 @@ module.exports = grammar({
       ),
 
     // ── SELECT ────────────────────────────────────────────────────
-
     select_modifier: ($) => choice(kw("single"), kw("distinct")),
 
     select_statement_obsolete: ($) =>
@@ -610,6 +611,16 @@ module.exports = grammar({
         alias($._select_target, $.target),
         optional(
           seq(optional($.for_all_entries), alias($._where_clause, $.where)),
+        ),
+        optional(
+          seq(
+            kw("order"),
+            kw("by"),
+            choice(
+              seq(kw("primary"), kw("key")),
+              repeat1(seq($.name, optional(choice(kw("ascending"), kw("descending"))))),
+            ),
+          ),
         ),
         ".",
       ),
@@ -667,7 +678,8 @@ module.exports = grammar({
 
     _read_table_result: ($) =>
       choice(
-        seq(kw("into"), $.name),
+        seq(kw("into"), choice($.inline_declaration, $.name)),
+        seq(kw("assigning"), choice($.inline_fs_declaration, $.field_symbol_name)),
         seq(kw("transporting"), kw("no"), kw("fields")),
       ),
 
@@ -1032,8 +1044,34 @@ module.exports = grammar({
     collect_statement: ($) =>
       seq(kw("collect"), $.name, kw("into"), $.name, "."),
 
+    translate_statement: ($) =>
+      seq(
+        kw("translate"),
+        $._data_object,
+        kw("to"),
+        choice(seq(kw("upper"), kw("case")), seq(kw("lower"), kw("case"))),
+        ".",
+      ),
+
+    split_statement: ($) =>
+      seq(
+        kw("split"),
+        $._general_expression_position,
+        kw("at"),
+        $._general_expression_position,
+        kw("into"),
+        choice(
+          seq(kw("table"), $._data_object),
+          repeat1($._data_object),
+        ),
+        ".",
+      ),
+
     // ── Inline declaration & constructor expressions ───────────────
     inline_declaration: ($) => seq(kw("data"), "(", field("name", $.name), ")"),
+
+    inline_fs_declaration: ($) =>
+      seq(kw("field-symbol"), "(", $.field_symbol_name, ")"),
 
     constructor_expression: ($) =>
       seq(
@@ -1103,5 +1141,4 @@ module.exports = grammar({
 function kw(word) {
   return alias(new RegExp(word, "i"), word);
 }
-
 

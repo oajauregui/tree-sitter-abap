@@ -734,6 +734,14 @@
           "named": true
         },
         {
+          "type": "split_statement",
+          "named": true
+        },
+        {
+          "type": "translate_statement",
+          "named": true
+        },
+        {
           "type": "try_catch_statement",
           "named": true
         },
@@ -1879,6 +1887,14 @@
           "named": true
         },
         {
+          "type": "split_statement",
+          "named": true
+        },
+        {
+          "type": "translate_statement",
+          "named": true
+        },
+        {
           "type": "try_catch_statement",
           "named": true
         },
@@ -2121,6 +2137,14 @@
           "named": true
         },
         {
+          "type": "split_statement",
+          "named": true
+        },
+        {
+          "type": "translate_statement",
+          "named": true
+        },
+        {
           "type": "try_catch_statement",
           "named": true
         },
@@ -2168,6 +2192,21 @@
           }
         ]
       }
+    }
+  },
+  {
+    "type": "inline_fs_declaration",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "field_symbol_name",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -2400,6 +2439,14 @@
           "named": true
         },
         {
+          "type": "inline_declaration",
+          "named": true
+        },
+        {
+          "type": "inline_fs_declaration",
+          "named": true
+        },
+        {
           "type": "interface_declaration",
           "named": true
         },
@@ -2460,7 +2507,15 @@
           "named": true
         },
         {
+          "type": "split_statement",
+          "named": true
+        },
+        {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "translate_statement",
           "named": true
         },
         {
@@ -2646,6 +2701,14 @@
         },
         {
           "type": "sort_statement",
+          "named": true
+        },
+        {
+          "type": "split_statement",
+          "named": true
+        },
+        {
+          "type": "translate_statement",
           "named": true
         },
         {
@@ -3148,6 +3211,14 @@
           "named": true
         },
         {
+          "type": "split_statement",
+          "named": true
+        },
+        {
+          "type": "translate_statement",
+          "named": true
+        },
+        {
           "type": "try_catch_statement",
           "named": true
         },
@@ -3295,6 +3366,18 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "inline_declaration",
+          "named": true
+        },
+        {
+          "type": "inline_fs_declaration",
+          "named": true
+        },
         {
           "type": "line_spec",
           "named": true
@@ -3525,6 +3608,53 @@
     }
   },
   {
+    "type": "split_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "arithmetic_expression",
+          "named": true
+        },
+        {
+          "type": "attribute_access_static",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "constructor_expression",
+          "named": true
+        },
+        {
+          "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "numeric_literal",
+          "named": true
+        },
+        {
+          "type": "structured_data_object",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "structure_component",
     "named": true,
     "fields": {},
@@ -3661,6 +3791,33 @@
         },
         {
           "type": "inline_declaration",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "structured_data_object",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "translate_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute_access_static",
+          "named": true
+        },
+        {
+          "type": "field_symbol_name",
           "named": true
         },
         {
@@ -3840,6 +3997,14 @@
         },
         {
           "type": "sort_statement",
+          "named": true
+        },
+        {
+          "type": "split_statement",
+          "named": true
+        },
+        {
+          "type": "translate_statement",
           "named": true
         },
         {
@@ -4129,7 +4294,15 @@
           "named": true
         },
         {
+          "type": "split_statement",
+          "named": true
+        },
+        {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "translate_statement",
           "named": true
         },
         {
@@ -4550,6 +4723,10 @@
     "named": false
   },
   {
+    "type": "field-symbol",
+    "named": false
+  },
+  {
     "type": "field-symbols",
     "named": false
   },
@@ -4682,6 +4859,10 @@
     "named": false
   },
   {
+    "type": "lower",
+    "named": false
+  },
+  {
     "type": "memory",
     "named": false
   },
@@ -4742,7 +4923,15 @@
     "named": false
   },
   {
+    "type": "order",
+    "named": false
+  },
+  {
     "type": "others",
+    "named": false
+  },
+  {
+    "type": "primary",
     "named": false
   },
   {
@@ -4854,6 +5043,10 @@
     "named": false
   },
   {
+    "type": "split",
+    "named": false
+  },
+  {
     "type": "standard",
     "named": false
   },
@@ -4886,6 +5079,10 @@
     "named": false
   },
   {
+    "type": "translate",
+    "named": false
+  },
+  {
     "type": "transporting",
     "named": false
   },
@@ -4895,14 +5092,18 @@
   },
   {
     "type": "type",
-    "named": true
-  },
-  {
-    "type": "type",
     "named": false
   },
   {
+    "type": "type",
+    "named": true
+  },
+  {
     "type": "up",
+    "named": false
+  },
+  {
+    "type": "upper",
     "named": false
   },
   {
