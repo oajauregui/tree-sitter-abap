@@ -5,7 +5,7 @@
     "fields": {
       "itab": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "name",
@@ -15,14 +15,40 @@
       },
       "line_spec": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
+            "type": "attribute_access_static",
+            "named": true
+          },
+          {
+            "type": "field_symbol_name",
+            "named": true
+          },
+          {
             "type": "name",
+            "named": true
+          },
+          {
+            "type": "structured_data_object",
             "named": true
           }
         ]
       }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "result",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -70,6 +96,10 @@
           "named": true
         },
         {
+          "type": "host_variable",
+          "named": true
+        },
+        {
           "type": "name",
           "named": true
         },
@@ -110,6 +140,10 @@
         },
         {
           "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -261,6 +295,10 @@
             "named": true
           },
           {
+            "type": "host_variable",
+            "named": true
+          },
+          {
             "type": "importing",
             "named": false
           },
@@ -346,6 +384,10 @@
           },
           {
             "type": "field_symbol_name",
+            "named": true
+          },
+          {
+            "type": "host_variable",
             "named": true
           },
           {
@@ -437,6 +479,10 @@
             "named": true
           },
           {
+            "type": "host_variable",
+            "named": true
+          },
+          {
             "type": "importing",
             "named": false
           },
@@ -494,6 +540,10 @@
         },
         {
           "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -809,6 +859,10 @@
         },
         {
           "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -1161,6 +1215,10 @@
             "named": true
           },
           {
+            "type": "host_variable",
+            "named": true
+          },
+          {
             "type": "name",
             "named": true
           },
@@ -1202,6 +1260,10 @@
         },
         {
           "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -1260,6 +1322,10 @@
         },
         {
           "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -1401,6 +1467,10 @@
           "named": true
         },
         {
+          "type": "host_variable",
+          "named": true
+        },
+        {
           "type": "name",
           "named": true
         },
@@ -1449,6 +1519,10 @@
         },
         {
           "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -1527,6 +1601,10 @@
         },
         {
           "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -1840,6 +1918,33 @@
     }
   },
   {
+    "type": "host_variable",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute_access_static",
+          "named": true
+        },
+        {
+          "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "structured_data_object",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "if_statement",
     "named": true,
     "fields": {},
@@ -2128,6 +2233,10 @@
           "named": true
         },
         {
+          "type": "host_variable",
+          "named": true
+        },
+        {
           "type": "name",
           "named": true
         },
@@ -2276,6 +2385,10 @@
         },
         {
           "type": "function_implementation",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -2751,6 +2864,10 @@
             "named": true
           },
           {
+            "type": "host_variable",
+            "named": true
+          },
+          {
             "type": "name",
             "named": true
           },
@@ -2802,6 +2919,10 @@
         },
         {
           "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -3214,6 +3335,10 @@
           "named": true
         },
         {
+          "type": "host_variable",
+          "named": true
+        },
+        {
           "type": "name",
           "named": true
         },
@@ -3296,7 +3421,17 @@
   {
     "type": "select_list",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "select_statement_obsolete",
@@ -3332,6 +3467,10 @@
         },
         {
           "type": "for_all_entries",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -3476,6 +3615,10 @@
             "named": true
           },
           {
+            "type": "host_variable",
+            "named": true
+          },
+          {
             "type": "name",
             "named": true
           },
@@ -3500,7 +3643,23 @@
       "required": true,
       "types": [
         {
+          "type": "attribute_access_static",
+          "named": true
+        },
+        {
+          "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "inline_declaration",
+          "named": true
+        },
+        {
           "type": "name",
+          "named": true
+        },
+        {
+          "type": "structured_data_object",
           "named": true
         }
       ]
@@ -3901,6 +4060,10 @@
           "named": true
         },
         {
+          "type": "host_variable",
+          "named": true
+        },
+        {
           "type": "if_statement",
           "named": true
         },
@@ -4023,6 +4186,10 @@
           "named": true
         },
         {
+          "type": "host_variable",
+          "named": true
+        },
+        {
           "type": "name",
           "named": true
         },
@@ -4036,14 +4203,6 @@
         }
       ]
     }
-  },
-  {
-    "type": " ( ",
-    "named": false
-  },
-  {
-    "type": " ) ",
-    "named": false
   },
   {
     "type": "!",
@@ -4107,6 +4266,10 @@
   },
   {
     "type": "=>",
+    "named": false
+  },
+  {
+    "type": "@",
     "named": false
   },
   {
@@ -4291,6 +4454,10 @@
   },
   {
     "type": "descending",
+    "named": false
+  },
+  {
+    "type": "distinct",
     "named": false
   },
   {
@@ -4494,6 +4661,10 @@
     "named": false
   },
   {
+    "type": "lines",
+    "named": false
+  },
+  {
     "type": "local",
     "named": false
   },
@@ -4662,6 +4833,10 @@
     "named": false
   },
   {
+    "type": "single",
+    "named": false
+  },
+  {
     "type": "sort",
     "named": false
   },
@@ -4711,11 +4886,11 @@
   },
   {
     "type": "type",
-    "named": true
+    "named": false
   },
   {
     "type": "type",
-    "named": false
+    "named": true
   },
   {
     "type": "up",
