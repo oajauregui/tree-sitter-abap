@@ -4050,6 +4050,31 @@
         }
       ]
     },
+    "select_modifier": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "single",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "single"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "distinct",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "distinct"
+        }
+      ]
+    },
     "select_statement_obsolete": {
       "type": "SEQ",
       "members": [
@@ -4067,32 +4092,8 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "ALIAS",
-              "content": {
-                "type": "PATTERN",
-                "value": "single",
-                "flags": "i"
-              },
-              "named": false,
-              "value": "single"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "ALIAS",
-              "content": {
-                "type": "PATTERN",
-                "value": "distinct",
-                "flags": "i"
-              },
-              "named": false,
-              "value": "distinct"
+              "type": "SYMBOL",
+              "name": "select_modifier"
             },
             {
               "type": "BLANK"

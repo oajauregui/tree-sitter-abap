@@ -594,11 +594,13 @@ module.exports = grammar({
       ),
 
     // ── SELECT ────────────────────────────────────────────────────
+
+    select_modifier: ($) => choice(kw("single"), kw("distinct")),
+
     select_statement_obsolete: ($) =>
       seq(
         kw("select"),
-        optional(kw("single")),
-        optional(kw("distinct")),
+        optional($.select_modifier),
         $.select_list,
         optional(
           seq(kw("up"), kw("to"), $._general_expression_position, kw("rows")),

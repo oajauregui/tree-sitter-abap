@@ -3434,6 +3434,11 @@
     }
   },
   {
+    "type": "select_modifier",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "select_statement_obsolete",
     "named": true,
     "fields": {},
@@ -3483,6 +3488,10 @@
         },
         {
           "type": "select_list",
+          "named": true
+        },
+        {
+          "type": "select_modifier",
           "named": true
         },
         {
@@ -4886,11 +4895,11 @@
   },
   {
     "type": "type",
-    "named": false
+    "named": true
   },
   {
     "type": "type",
-    "named": true
+    "named": false
   },
   {
     "type": "up",
