@@ -514,7 +514,8 @@ module.exports = grammar({
         $.numeric_literal,
         $.character_literal,
         $._data_object,
-        $._calculation_expression
+        $._calculation_expression,
+        $.constructor_expression
       ),
 
     _calculation_expression: $ => choice($.arithmetic_expression),
@@ -581,7 +582,7 @@ module.exports = grammar({
 
     _writeable_expression: $ =>
       choice(
-        // inline declaration
+        $.inline_declaration,
         // constructor expression
         $.table_expression
       ),
@@ -1019,6 +1020,49 @@ module.exports = grammar({
     collect_statement: $ =>
       seq(kw("collect"), $.name, kw("into"), $.name, "."),
 
+  inline_declaration: $ =>
+      seq(kw("data"), "(", field("name", $.name), ")"),
+
+    constructor_expression: $ =>
+      seq(
+        choice(
+          kw("cond"),
+          kw("switch"),
+          kw("value"),
+          kw("new"),
+          kw("conv"),
+          kw("cast"),
+          kw("filter"),
+          kw("reduce"),
+        ),
+        alias($.name, $.type),
+        "(",
+        repeat(choice(
+          $.constructor_when_clause,
+          seq(kw("else"), $._general_expression_position),
+          $.comp_spec,
+          $._general_expression_position,
+        )),
+        ")"
+      ),
+
+    constructor_when_clause: $ =>
+      seq(
+        kw("when"),
+        $._constructor_condition,
+        kw("then"),
+        $._general_expression_position
+      ),
+
+    _constructor_condition: $ =>
+      choice(
+        prec.left(2, seq($._constructor_condition, kw("and"), $._constructor_condition)),
+        prec.left(1, seq($._constructor_condition, kw("or"), $._constructor_condition)),
+        prec.right(4, seq(kw("not"), $._constructor_condition)),
+        $.comparison_expression,
+        prec.left(5, seq($._operand, kw("is"), kw("initial"))),
+        $._general_expression_position,
+      ),
 
     _operand: $ => choice($._escaped_operand, $.name),
 
