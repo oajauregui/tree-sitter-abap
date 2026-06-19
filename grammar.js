@@ -692,6 +692,8 @@ module.exports = grammar({
         choice(
           seq($.line_spec, $._read_table_result),
           seq($._read_table_result, $.line_spec),
+          seq(kw("index"), $._general_expression_position, optional($._read_table_result)),
+          seq($._read_table_result, kw("index"), $._general_expression_position),
         ),
         ".",
       ),
@@ -888,6 +890,7 @@ module.exports = grammar({
           ),
           seq(kw("importing"), $.parameter_list),
           seq(kw("changing"), $.parameter_list),
+          seq(kw("tables"), $.parameter_list),
         ),
       ),
 

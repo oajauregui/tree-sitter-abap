@@ -266,6 +266,10 @@
           {
             "type": "parameter_list",
             "named": true
+          },
+          {
+            "type": "tables",
+            "named": false
           }
         ]
       }
@@ -3584,7 +3588,27 @@
       "required": true,
       "types": [
         {
+          "type": "arithmetic_expression",
+          "named": true
+        },
+        {
+          "type": "attribute_access_static",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "constructor_expression",
+          "named": true
+        },
+        {
           "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
           "named": true
         },
         {
@@ -3601,6 +3625,18 @@
         },
         {
           "type": "name",
+          "named": true
+        },
+        {
+          "type": "numeric_literal",
+          "named": true
+        },
+        {
+          "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "text_symbol",
           "named": true
         }
       ]

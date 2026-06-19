@@ -5048,6 +5048,60 @@
                   "name": "line_spec"
                 }
               ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "PATTERN",
+                    "value": "index",
+                    "flags": "i"
+                  },
+                  "named": false,
+                  "value": "index"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_general_expression_position"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "_read_table_result"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_read_table_result"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "PATTERN",
+                    "value": "index",
+                    "flags": "i"
+                  },
+                  "named": false,
+                  "value": "index"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_general_expression_position"
+                }
+              ]
             }
           ]
         },
@@ -6076,6 +6130,25 @@
                 },
                 "named": false,
                 "value": "changing"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "parameter_list"
+              }
+            ]
+          },
+          {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "PATTERN",
+                  "value": "tables",
+                  "flags": "i"
+                },
+                "named": false,
+                "value": "tables"
               },
               {
                 "type": "SYMBOL",
