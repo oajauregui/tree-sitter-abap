@@ -16,6 +16,9 @@ module.exports = grammar({
         $.class_local_friend_publication,
         $.interface_declaration,
         $.function_implementation,
+        $.selection_screen_statement,
+        $.at_selection_screen_statement,
+        $.parameters_statement,
         $._implementation_statement,
       ),
 
@@ -376,11 +379,24 @@ module.exports = grammar({
             $.name,
           ),
         ),
+        optional(
+          seq(
+            kw("with"),
+            choice(
+              seq(
+                optional(choice(kw("unique"), kw("non-unique"))),
+                kw("key"),
+                $.name,
+              ),
+              seq(kw("default"), kw("key")),
+            ),
+          ),
+        ),
       ),
 
     variable_declaration: ($) =>
       seq(
-        kw("data"),
+        choice(kw("data"), kw("statics"), kw("class-data")),
         field("name", $.name),
         field("typing", alias($._data_object_typing, $.typing)),
         ".",
@@ -388,7 +404,7 @@ module.exports = grammar({
 
     chained_variable_declaration: ($) =>
       seq(
-        kw("data"),
+        choice(kw("data"), kw("statics"), kw("class-data")),
         ":",
         repeat1(choice($.variable, seq(",", $.variable))),
         ".",
@@ -398,7 +414,7 @@ module.exports = grammar({
 
     chained_structure_declaration: ($) =>
       seq(
-        kw("data"),
+        choice(kw("data"), kw("statics"), kw("class-data")),
         ":",
         kw("begin"),
         kw("of"),
@@ -501,6 +517,7 @@ module.exports = grammar({
       choice(
         $.numeric_literal,
         $.character_literal,
+        $.text_symbol,
         $._data_object,
         $._calculation_expression,
         $.constructor_expression,
@@ -603,12 +620,22 @@ module.exports = grammar({
         kw("select"),
         optional($.select_modifier),
         $.select_list,
-        optional(
-          seq(kw("up"), kw("to"), $._general_expression_position, kw("rows")),
+        choice(
+          // Style A: SELECT fields FROM table INTO target ...
+          seq(
+            optional(seq(kw("up"), kw("to"), $._general_expression_position, kw("rows"))),
+            kw("from"),
+            alias($.name, $.data_source),
+            alias($._select_target, $.target),
+          ),
+          // Style B: SELECT fields INTO target UP TO n ROWS FROM table ...
+          seq(
+            alias($._select_target, $.target),
+            optional(seq(kw("up"), kw("to"), $._general_expression_position, kw("rows"))),
+            kw("from"),
+            alias($.name, $.data_source),
+          ),
         ),
-        kw("from"),
-        alias($.name, $.data_source),
-        alias($._select_target, $.target),
         optional(
           seq(optional($.for_all_entries), alias($._where_clause, $.where)),
         ),
@@ -1044,6 +1071,74 @@ module.exports = grammar({
     collect_statement: ($) =>
       seq(kw("collect"), $.name, kw("into"), $.name, "."),
 
+    // ── Report / selection-screen constructs ──────────────────────
+    selection_screen_statement: ($) =>
+      seq(
+        kw("selection-screen"),
+        choice(
+          seq(
+            kw("begin"),
+            kw("of"),
+            kw("block"),
+            $.name,
+            optional(
+              seq(
+                kw("with"),
+                kw("frame"),
+                optional(seq(kw("title"), $._general_expression_position)),
+              ),
+            ),
+          ),
+          seq(kw("end"), kw("of"), kw("block"), $.name),
+          seq(kw("skip"), optional($.numeric_literal)),
+          seq(kw("comment"), $._general_expression_position, optional(seq(kw("for"), kw("field"), $.name))),
+          seq(kw("pushbutton"), $._general_expression_position, $.name, optional(seq(kw("user-command"), $.name))),
+          $._general_expression_position,
+        ),
+        ".",
+      ),
+
+    at_selection_screen_statement: ($) =>
+      seq(
+        kw("at"),
+        kw("selection-screen"),
+        optional(
+          choice(
+            seq(kw("on"), kw("value-request"), kw("for"), $.name),
+            seq(kw("on"), kw("block"), $.name),
+            seq(kw("on"), $.name),
+            kw("output"),
+          ),
+        ),
+        ".",
+      ),
+
+    parameters_statement: ($) =>
+      seq(
+        kw("parameters"),
+        choice(
+          seq(":", repeat1(choice($.parameter_def, seq(",", $.parameter_def)))),
+          $.parameter_def,
+        ),
+        ".",
+      ),
+
+    parameter_def: ($) =>
+      seq(
+        $.name,
+        optional($._data_object_typing_normal),
+        optional(seq(kw("default"), $._general_expression_position)),
+        optional(seq(kw("radiobutton"), kw("group"), $.name)),
+        optional(seq(kw("user-command"), $.name)),
+        optional(seq(kw("modif"), kw("id"), $.name)),
+        optional(kw("obligatory")),
+        optional(seq(kw("as"), choice(kw("checkbox"), kw("listbox")))),
+        optional(seq(kw("for"), kw("field"), $.name)),
+        optional(seq(kw("visible"), kw("length"), $.numeric_literal)),
+        optional(seq(kw("lower"), kw("case"))),
+        optional(kw("no-display")),
+      ),
+
     translate_statement: ($) =>
       seq(
         kw("translate"),
@@ -1085,7 +1180,7 @@ module.exports = grammar({
           kw("filter"),
           kw("reduce"),
         ),
-        alias($.name, $.type),
+        choice(alias($.name, $.type), alias("#", $.type)),
         "(",
         repeat(
           choice(
@@ -1127,6 +1222,7 @@ module.exports = grammar({
     _escaped_operand: ($) => seq("!", $.name),
     numeric_literal: ($) => /[0-9]+/,
     character_literal: ($) => /'[^']+'/,
+    text_symbol: ($) => /text-[a-z0-9]{3}/i,
     eol_comment: ($) => seq('"', /[^\n]*/),
     bol_comment: ($) => seq("*", /[^\n]*/),
     name: ($) => /[a-zA-Z_][a-zA-Z0-9_]{0,29}/i,
