@@ -5,6 +5,11 @@ module.exports = grammar({
 
   extras: ($) => [/\s+/, $.eol_comment, $.bol_comment],
 
+  conflicts: ($) => [
+    // FUNCTION name. body ENDFUNCTION. vs macro_include for the same tokens
+    [$.function_implementation, $.macro_include],
+  ],
+
   rules: {
     program: ($) => repeat($._statement),
 
@@ -1024,7 +1029,16 @@ module.exports = grammar({
     when_clause: ($) =>
       seq(
         kw("when"),
-        choice(kw("others"), repeat1($._general_expression_position)),
+        choice(
+          kw("others"),
+          // CASE abap_true. WHEN condition IS INITIAL AND other IS NOT INITIAL.
+          $._logical_expression,
+          // CASE lv_var. WHEN 'A' OR 'B'.
+          seq(
+            $._general_expression_position,
+            repeat(seq(kw("or"), $._general_expression_position)),
+          ),
+        ),
         ".",
         repeat($._implementation_statement),
       ),

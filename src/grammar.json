@@ -7053,11 +7053,39 @@
               "value": "others"
             },
             {
-              "type": "REPEAT1",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_general_expression_position"
-              }
+              "type": "SYMBOL",
+              "name": "_logical_expression"
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_general_expression_position"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "PATTERN",
+                          "value": "or",
+                          "flags": "i"
+                        },
+                        "named": false,
+                        "value": "or"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "_general_expression_position"
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
@@ -8978,7 +9006,12 @@
       "name": "bol_comment"
     }
   ],
-  "conflicts": [],
+  "conflicts": [
+    [
+      "function_implementation",
+      "macro_include"
+    ]
+  ],
   "precedences": [],
   "externals": [],
   "inline": [],
