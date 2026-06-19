@@ -326,7 +326,12 @@ module.exports = grammar({
         seq(kw("type"), kw("ref"), kw("to"), alias($.name, $.type)),
       ),
 
-    generic_type: ($) => choice(kw("any"), seq(kw("any"), kw("table"))),
+    generic_type: ($) =>
+      choice(
+        kw("any"),
+        seq(kw("any"), kw("table")),
+        kw("field-symbol"),
+      ),
 
     _data_object_typing: ($) =>
       choice(
@@ -505,6 +510,9 @@ module.exports = grammar({
           seq($._logical_expression, kw("and"), $._logical_expression),
         ),
         prec.left(5, seq($._operand, kw("is"), kw("initial"))),
+        prec.left(5, seq($._operand, kw("is"), kw("not"), kw("initial"))),
+        prec.left(5, seq($._operand, kw("is"), kw("bound"))),
+        prec.left(5, seq($._operand, kw("is"), kw("not"), kw("bound"))),
       ),
 
     comparison_expression: ($) =>
@@ -1141,16 +1149,20 @@ module.exports = grammar({
       seq(
         $.name,
         optional($._data_object_typing_normal),
-        optional(seq(kw("default"), $._general_expression_position)),
-        optional(seq(kw("radiobutton"), kw("group"), $.name)),
-        optional(seq(kw("user-command"), $.name)),
-        optional(seq(kw("modif"), kw("id"), $.name)),
-        optional(kw("obligatory")),
-        optional(seq(kw("as"), choice(kw("checkbox"), kw("listbox")))),
-        optional(seq(kw("for"), kw("field"), $.name)),
-        optional(seq(kw("visible"), kw("length"), $.numeric_literal)),
-        optional(seq(kw("lower"), kw("case"))),
-        optional(kw("no-display")),
+        repeat(
+          choice(
+            seq(kw("default"), $._general_expression_position),
+            seq(kw("radiobutton"), kw("group"), $.name),
+            seq(kw("user-command"), $.name),
+            seq(kw("modif"), kw("id"), $.name),
+            kw("obligatory"),
+            seq(kw("as"), choice(kw("checkbox"), kw("listbox"))),
+            seq(kw("for"), kw("field"), $.name),
+            seq(kw("visible"), kw("length"), $.numeric_literal),
+            seq(kw("lower"), kw("case")),
+            kw("no-display"),
+          ),
+        ),
       ),
 
     translate_statement: ($) =>
