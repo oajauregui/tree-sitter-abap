@@ -50,6 +50,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "tables_statement"
+        },
+        {
+          "type": "SYMBOL",
           "name": "_implementation_statement"
         }
       ]
@@ -7305,6 +7309,68 @@
         {
           "type": "SYMBOL",
           "name": "name"
+        },
+        {
+          "type": "STRING",
+          "value": "."
+        }
+      ]
+    },
+    "tables_statement": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "tables",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "tables"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": ":"
+                },
+                {
+                  "type": "REPEAT1",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "name"
+                      },
+                      {
+                        "type": "SEQ",
+                        "members": [
+                          {
+                            "type": "STRING",
+                            "value": ","
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "name"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "name"
+            }
+          ]
         },
         {
           "type": "STRING",

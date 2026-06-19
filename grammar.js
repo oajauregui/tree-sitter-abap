@@ -19,6 +19,7 @@ module.exports = grammar({
         $.selection_screen_statement,
         $.at_selection_screen_statement,
         $.parameters_statement,
+        $.tables_statement,
         $._implementation_statement,
       ),
 
@@ -1072,6 +1073,16 @@ module.exports = grammar({
       seq(kw("collect"), $.name, kw("into"), $.name, "."),
 
     // ── Report / selection-screen constructs ──────────────────────
+    tables_statement: ($) =>
+      seq(
+        kw("tables"),
+        choice(
+          seq(":", repeat1(choice($.name, seq(",", $.name)))),
+          $.name,
+        ),
+        ".",
+      ),
+
     selection_screen_statement: ($) =>
       seq(
         kw("selection-screen"),

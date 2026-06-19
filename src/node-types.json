@@ -789,6 +789,10 @@
           "named": true
         },
         {
+          "type": "tables_statement",
+          "named": true
+        },
+        {
           "type": "translate_statement",
           "named": true
         },
@@ -2232,6 +2236,10 @@
           "named": true
         },
         {
+          "type": "tables_statement",
+          "named": true
+        },
+        {
           "type": "translate_statement",
           "named": true
         },
@@ -2619,6 +2627,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "tables_statement",
           "named": true
         },
         {
@@ -3416,6 +3428,10 @@
           "named": true
         },
         {
+          "type": "tables_statement",
+          "named": true
+        },
+        {
           "type": "translate_statement",
           "named": true
         },
@@ -4042,6 +4058,21 @@
     }
   },
   {
+    "type": "tables_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "target",
     "named": true,
     "fields": {},
@@ -4281,6 +4312,10 @@
         },
         {
           "type": "split_statement",
+          "named": true
+        },
+        {
+          "type": "tables_statement",
           "named": true
         },
         {
@@ -5451,6 +5486,10 @@
     "named": false
   },
   {
+    "type": "tables",
+    "named": false
+  },
+  {
     "type": "text_symbol",
     "named": true
   },
@@ -5480,11 +5519,11 @@
   },
   {
     "type": "type",
-    "named": false
+    "named": true
   },
   {
     "type": "type",
-    "named": true
+    "named": false
   },
   {
     "type": "unique",
