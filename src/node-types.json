@@ -116,6 +116,10 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
           "named": true
         }
@@ -172,6 +176,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -425,6 +433,10 @@
             "named": true
           },
           {
+            "type": "table_expression",
+            "named": true
+          },
+          {
             "type": "text_symbol",
             "named": true
           }
@@ -522,6 +534,10 @@
           },
           {
             "type": "structured_data_object",
+            "named": true
+          },
+          {
+            "type": "table_expression",
             "named": true
           },
           {
@@ -625,6 +641,10 @@
             "named": true
           },
           {
+            "type": "table_expression",
+            "named": true
+          },
+          {
             "type": "text_symbol",
             "named": true
           }
@@ -678,6 +698,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -1044,6 +1068,10 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
           "named": true
         }
@@ -1064,6 +1092,10 @@
         },
         {
           "type": "name",
+          "named": true
+        },
+        {
+          "type": "predicate_call",
           "named": true
         }
       ]
@@ -1405,6 +1437,10 @@
             "named": true
           },
           {
+            "type": "table_expression",
+            "named": true
+          },
+          {
             "type": "text_symbol",
             "named": true
           }
@@ -1458,6 +1494,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -1528,6 +1568,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -1673,6 +1717,10 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
           "named": true
         }
@@ -1775,6 +1823,10 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
           "named": true
         },
@@ -1835,6 +1887,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -1927,6 +1983,10 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
           "named": true
         }
@@ -1983,6 +2043,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -2068,11 +2132,19 @@
           "named": true
         },
         {
+          "type": "predicate_call",
+          "named": true
+        },
+        {
           "type": "string_template",
           "named": true
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -2603,6 +2675,10 @@
           "named": true
         },
         {
+          "type": "predicate_call",
+          "named": true
+        },
+        {
           "type": "raise_exception_statement",
           "named": true
         },
@@ -2795,6 +2871,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -3054,6 +3134,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -3536,6 +3620,10 @@
             "named": true
           },
           {
+            "type": "table_expression",
+            "named": true
+          },
+          {
             "type": "text_symbol",
             "named": true
           }
@@ -3602,6 +3690,10 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
           "named": true
         },
@@ -3665,6 +3757,10 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
           "named": true
         }
@@ -3681,6 +3777,76 @@
       "types": [
         {
           "type": "parameter_def",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "predicate_call",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "name",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "arithmetic_expression",
+          "named": true
+        },
+        {
+          "type": "attribute_access_static",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "constructor_expression",
+          "named": true
+        },
+        {
+          "type": "field_symbol_name",
+          "named": true
+        },
+        {
+          "type": "host_variable",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "numeric_literal",
+          "named": true
+        },
+        {
+          "type": "string_template",
+          "named": true
+        },
+        {
+          "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
+          "named": true
+        },
+        {
+          "type": "text_symbol",
           "named": true
         }
       ]
@@ -4126,6 +4292,10 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
           "named": true
         }
@@ -4178,6 +4348,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -4261,7 +4435,7 @@
       "required": false,
       "types": [
         {
-          "type": "name",
+          "type": "sql_field",
           "named": true
         }
       ]
@@ -4329,11 +4503,19 @@
           "named": true
         },
         {
+          "type": "sql_join",
+          "named": true
+        },
+        {
           "type": "string_template",
           "named": true
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -4397,6 +4579,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -4470,7 +4656,130 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sql_arith_group",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "host_variable",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "numeric_literal",
+          "named": true
+        },
+        {
+          "type": "sql_arith_group",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sql_case_expr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "comparison_expression",
+          "named": true
+        },
+        {
+          "type": "host_variable",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "numeric_literal",
+          "named": true
+        },
+        {
+          "type": "predicate_call",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sql_field",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "sql_arith_group",
+          "named": true
+        },
+        {
+          "type": "sql_case_expr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sql_join",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "data_source",
+          "named": true
+        },
+        {
+          "type": "sql_join_cond",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sql_join_cond",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
           "named": true
         }
       ]
@@ -4593,6 +4902,10 @@
           },
           {
             "type": "structured_data_object",
+            "named": true
+          },
+          {
+            "type": "table_expression",
             "named": true
           },
           {
@@ -5151,6 +5464,10 @@
           "named": true
         },
         {
+          "type": "predicate_call",
+          "named": true
+        },
+        {
           "type": "raise_exception_statement",
           "named": true
         },
@@ -5195,6 +5512,10 @@
           "named": true
         },
         {
+          "type": "table_expression",
+          "named": true
+        },
+        {
           "type": "text_symbol",
           "named": true
         },
@@ -5231,6 +5552,10 @@
         },
         {
           "type": "name",
+          "named": true
+        },
+        {
+          "type": "predicate_call",
           "named": true
         }
       ]
@@ -5282,6 +5607,10 @@
         },
         {
           "type": "structured_data_object",
+          "named": true
+        },
+        {
+          "type": "table_expression",
           "named": true
         },
         {
@@ -5552,6 +5881,10 @@
     "named": false
   },
   {
+    "type": "cross",
+    "named": false
+  },
+  {
     "type": "data",
     "named": false
   },
@@ -5788,6 +6121,10 @@
     "named": false
   },
   {
+    "type": "inner",
+    "named": false
+  },
+  {
     "type": "interface",
     "named": false
   },
@@ -5804,11 +6141,19 @@
     "named": true
   },
   {
+    "type": "join",
+    "named": false
+  },
+  {
     "type": "keeping",
     "named": false
   },
   {
     "type": "key",
+    "named": false
+  },
+  {
+    "type": "left",
     "named": false
   },
   {
@@ -6036,6 +6381,10 @@
     "named": false
   },
   {
+    "type": "right",
+    "named": false
+  },
+  {
     "type": "rows",
     "named": false
   },
@@ -6157,11 +6506,11 @@
   },
   {
     "type": "type",
-    "named": true
+    "named": false
   },
   {
     "type": "type",
-    "named": false
+    "named": true
   },
   {
     "type": "unique",
@@ -6209,6 +6558,10 @@
   },
   {
     "type": "write",
+    "named": false
+  },
+  {
+    "type": "~",
     "named": false
   }
 ]
