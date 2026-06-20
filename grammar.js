@@ -10,6 +10,7 @@ module.exports = grammar({
     [$.function_implementation, $.macro_include],
     // constructor_expression body: MAPPING/EXCEPT/WHERE clauses vs _general_expression_position
     [$.constructor_mapping_clause, $.comp_spec],
+    [$.constructor_except_clause, $.macro_include],
     [$.constructor_expression, $.macro_include],
   ],
 
@@ -1285,7 +1286,7 @@ module.exports = grammar({
 
     // CORRESPONDING #( src EXCEPT field )
     constructor_except_clause: ($) =>
-      seq(kw("except"), repeat1($.name)),
+      prec.left(seq(kw("except"), repeat1($.name))),
 
     // FILTER #( itab USING KEY keyname ... )
     constructor_using_key_clause: ($) =>

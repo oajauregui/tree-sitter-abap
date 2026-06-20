@@ -8970,26 +8970,30 @@
       }
     },
     "constructor_except_clause": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "ALIAS",
-          "content": {
-            "type": "PATTERN",
-            "value": "except",
-            "flags": "i"
+      "type": "PREC_LEFT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "PATTERN",
+              "value": "except",
+              "flags": "i"
+            },
+            "named": false,
+            "value": "except"
           },
-          "named": false,
-          "value": "except"
-        },
-        {
-          "type": "REPEAT1",
-          "content": {
-            "type": "SYMBOL",
-            "name": "name"
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "SYMBOL",
+              "name": "name"
+            }
           }
-        }
-      ]
+        ]
+      }
     },
     "constructor_using_key_clause": {
       "type": "SEQ",
@@ -9646,6 +9650,10 @@
     [
       "constructor_mapping_clause",
       "comp_spec"
+    ],
+    [
+      "constructor_except_clause",
+      "macro_include"
     ],
     [
       "constructor_expression",
