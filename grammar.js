@@ -13,6 +13,10 @@ module.exports = grammar({
     [$.constructor_except_clause, $.macro_include],
     [$.constructor_for_clause, $.macro_include],
     [$.constructor_expression, $.macro_include],
+    // predicate_call (name "(" ...) vs comparison_expression (name "=" ...)
+    [$.predicate_call, $.comparison_expression],
+    // sql_case_expr in select_list vs sql_field (name alternative)
+    [$.sql_field, $.sql_case_expr],
   ],
 
   rules: {
@@ -513,6 +517,7 @@ module.exports = grammar({
     _logical_expression: ($) =>
       choice(
         $.comparison_expression,
+        $.predicate_call,
         prec.right(4, seq(kw("not"), $._logical_expression)),
         prec.left(
           1,
@@ -526,6 +531,15 @@ module.exports = grammar({
         prec.left(5, seq($._operand, kw("is"), kw("not"), kw("initial"))),
         prec.left(5, seq($._operand, kw("is"), kw("bound"))),
         prec.left(5, seq($._operand, kw("is"), kw("not"), kw("bound"))),
+      ),
+
+    // Predicate function call: line_exists( ... ), xsdbool( ... ), etc.
+    predicate_call: ($) =>
+      seq(
+        field("name", $.name),
+        "(",
+        optional($._general_expression_position),
+        ")",
       ),
 
     comparison_expression: ($) =>
@@ -545,6 +559,7 @@ module.exports = grammar({
         $._calculation_expression,
         $.constructor_expression,
         $.host_variable,
+        $.table_expression,
       ),
 
     _calculation_expression: ($) => choice($.arithmetic_expression),
@@ -653,19 +668,19 @@ module.exports = grammar({
         optional($.select_modifier),
         $.select_list,
         choice(
-          // Style A: SELECT fields FROM table INTO target ...
+          // Style A: SELECT fields FROM table [JOIN...] INTO target ...
           seq(
             optional(seq(kw("up"), kw("to"), $._general_expression_position, kw("rows"))),
             kw("from"),
-            alias($.name, $.data_source),
+            seq(alias($.name, $.data_source), repeat($.sql_join)),
             alias($._select_target, $.target),
           ),
-          // Style B: SELECT fields INTO target UP TO n ROWS FROM table ...
+          // Style B: SELECT fields INTO target UP TO n ROWS FROM table [JOIN...]
           seq(
             alias($._select_target, $.target),
             optional(seq(kw("up"), kw("to"), $._general_expression_position, kw("rows"))),
             kw("from"),
-            alias($.name, $.data_source),
+            seq(alias($.name, $.data_source), repeat($.sql_join)),
           ),
         ),
         optional(
@@ -684,7 +699,76 @@ module.exports = grammar({
         ".",
       ),
 
-    select_list: ($) => choice("*", seq($.name, repeat(seq(",", $.name)))),
+    // Field list: *, name, name AS alias, table~field, CASE...END, (arithmetic)
+    select_list: ($) => choice(
+      "*",
+      seq($.sql_field, repeat(seq(",", $.sql_field))),
+    ),
+
+    // A single field in the SELECT list
+    sql_field: ($) => seq(
+      choice(
+        $.sql_case_expr,
+        $.sql_arith_group,
+        seq($.name, "~", choice("*", $.name)),
+        $.name,
+        "*",
+      ),
+      optional(seq(kw("as"), $.name)),
+    ),
+
+    // Inline SQL CASE: CASE WHEN cond THEN val ... [ELSE val] END
+    sql_case_expr: ($) => seq(
+      kw("case"),
+      repeat1(seq(kw("when"), $._sql_condition, kw("then"), $._sql_value)),
+      optional(seq(kw("else"), $._sql_value)),
+      kw("end"),
+    ),
+
+    _sql_value: ($) => choice(
+      $.host_variable,
+      $.character_literal,
+      $.numeric_literal,
+      seq($.name, "~", $.name),
+      $.name,
+    ),
+
+    // SQL arithmetic group: ( expr OP expr ), supports nesting
+    sql_arith_group: ($) => seq(
+      "(",
+      $._sql_arith_term,
+      repeat(seq(choice("+", "-", "*", "/"), $._sql_arith_term)),
+      ")",
+    ),
+
+    _sql_arith_term: ($) => choice(
+      $.sql_arith_group,
+      $.host_variable,
+      $.numeric_literal,
+      seq($.name, "~", $.name),
+      $.name,
+    ),
+
+    // JOIN clause: [INNER|LEFT|RIGHT|CROSS] JOIN table ON cond [AND cond ...]
+    sql_join: ($) => seq(
+      optional(choice(kw("inner"), kw("left"), kw("right"), kw("cross"))),
+      kw("join"),
+      alias($.name, $.data_source),
+      kw("on"),
+      $.sql_join_cond,
+      repeat(seq(choice(kw("and"), kw("or")), $.sql_join_cond)),
+    ),
+
+    sql_join_cond: ($) => seq(
+      $._sql_qualified_name,
+      "=",
+      $._sql_qualified_name,
+    ),
+
+    _sql_qualified_name: ($) => choice(
+      seq($.name, "~", choice("*", $.name)),
+      $.name,
+    ),
 
     _select_target: ($) =>
       choice(
@@ -1311,10 +1395,6 @@ module.exports = grammar({
           2,
           seq($._constructor_condition, kw("and"), $._constructor_condition),
         ),
-        prec.left(
-          1,
-          seq($._constructor_condition, kw("or"), $._constructor_condition),
-        ),
         prec.right(4, seq(kw("not"), $._constructor_condition)),
         $.comparison_expression,
         prec.left(5, seq($._operand, kw("is"), kw("initial"))),
@@ -1351,7 +1431,6 @@ module.exports = grammar({
     endselect_statement: ($) => seq(kw("endselect"), "."),
 
     // ── Terminals ─────────────────────────────────────────────────
-    // String template: |text {expr} more| — simplified (no embedded expr parsing)
     string_template: ($) => /\|[^|]*\|/,
 
     _operand: ($) => choice($._escaped_operand, $.name),
@@ -1373,4 +1452,3 @@ module.exports = grammar({
 function kw(word) {
   return alias(new RegExp(word, "i"), word);
 }
-
