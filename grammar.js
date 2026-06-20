@@ -1452,3 +1452,4 @@ module.exports = grammar({
 function kw(word) {
   return alias(new RegExp(word, "i"), word);
 }
+
