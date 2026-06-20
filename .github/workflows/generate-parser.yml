@@ -1,0 +1,33 @@
+name: Generate Parser
+
+on:
+  push:
+    paths:
+      - 'grammar.js'
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install tree-sitter-cli
+        run: npm install -g tree-sitter-cli@0.22.6
+
+      - name: Generate parser
+        run: tree-sitter generate
+
+      - name: Commit generated files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: regenerate parser from grammar.js'
+          file_pattern: 'src/'
