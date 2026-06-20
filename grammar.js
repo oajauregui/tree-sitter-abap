@@ -11,6 +11,7 @@ module.exports = grammar({
     // constructor_expression body: MAPPING/EXCEPT/WHERE clauses vs _general_expression_position
     [$.constructor_mapping_clause, $.comp_spec],
     [$.constructor_except_clause, $.macro_include],
+    [$.constructor_for_clause, $.macro_include],
     [$.constructor_expression, $.macro_include],
   ],
 
@@ -1272,13 +1273,13 @@ module.exports = grammar({
 
     // FOR x IN itab [WHERE ( cond )] — used inside VALUE/REDUCE/FILTER
     constructor_for_clause: ($) =>
-      seq(
+      prec.left(seq(
         kw("for"),
         $.name,
         kw("in"),
         $._general_expression_position,
         optional(seq(kw("where"), "(", $._constructor_condition, ")")),
-      ),
+      )),
 
     // CORRESPONDING #( src MAPPING a = b c = d )
     constructor_mapping_clause: ($) =>

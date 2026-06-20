@@ -8876,72 +8876,76 @@
       ]
     },
     "constructor_for_clause": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "ALIAS",
-          "content": {
-            "type": "PATTERN",
-            "value": "for",
-            "flags": "i"
-          },
-          "named": false,
-          "value": "for"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "name"
-        },
-        {
-          "type": "ALIAS",
-          "content": {
-            "type": "PATTERN",
-            "value": "in",
-            "flags": "i"
-          },
-          "named": false,
-          "value": "in"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_general_expression_position"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "PATTERN",
-                    "value": "where",
-                    "flags": "i"
-                  },
-                  "named": false,
-                  "value": "where"
-                },
-                {
-                  "type": "STRING",
-                  "value": "("
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "_constructor_condition"
-                },
-                {
-                  "type": "STRING",
-                  "value": ")"
-                }
-              ]
+      "type": "PREC_LEFT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "PATTERN",
+              "value": "for",
+              "flags": "i"
             },
-            {
-              "type": "BLANK"
-            }
-          ]
-        }
-      ]
+            "named": false,
+            "value": "for"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "name"
+          },
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "PATTERN",
+              "value": "in",
+              "flags": "i"
+            },
+            "named": false,
+            "value": "in"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_general_expression_position"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "PATTERN",
+                      "value": "where",
+                      "flags": "i"
+                    },
+                    "named": false,
+                    "value": "where"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "("
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_constructor_condition"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": ")"
+                  }
+                ]
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          }
+        ]
+      }
     },
     "constructor_mapping_clause": {
       "type": "PREC_LEFT",
@@ -9653,6 +9657,10 @@
     ],
     [
       "constructor_except_clause",
+      "macro_include"
+    ],
+    [
+      "constructor_for_clause",
       "macro_include"
     ],
     [
