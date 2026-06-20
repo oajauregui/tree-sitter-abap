@@ -1,218 +1,1374 @@
-FUNCTION z_get_mail_address.
-*"----------------------------------------------------------------------
-*"*"Local Interface:
-*"  IMPORTING
-*"     REFERENCE(P_CONTRACT) TYPE  VKONT_KK OPTIONAL
-*"  EXPORTING
-*"     REFERENCE(FULL_DATA) TYPE  ZST_POWER_BILL_ADDRESS
-*"----------------------------------------------------------------------
-  "--- Static tables are filled from the DB only once per session.
-  STATICS:
-    st_prefix_loaded         TYPE abap_bool,
-    st_suffix_loaded         TYPE abap_bool,
-    st_sec_unit_desig_loaded TYPE abap_bool,
-    st_prefix                TYPE HASHED TABLE OF zstreetprefix WITH UNIQUE KEY id,
-    st_suffix                TYPE HASHED TABLE OF zstreetsuffix WITH UNIQUE KEY id,
-    st_secunitdesig          TYPE HASHED TABLE OF zsecunitdesig WITH UNIQUE KEY id.
+module.exports = grammar({
+  name: "abap",
 
-  DATA: lt_words                    TYPE TABLE OF string,
-        lv_raw_second_unit          TYPE string,
-        lt_second_unit_words        TYPE TABLE OF string,
-        lt_second_unit_number_parts TYPE TABLE OF string,
-        st_eadrdat                  TYPE eadrdat.
+  word: ($) => $.name,
 
-  DATA: it_addressdata LIKE isuaccaddrdata OCCURS 1 WITH HEADER LINE,
-        wa_addressdata LIKE isuaccaddrdata.
+  extras: ($) => [/\s+/, $.eol_comment, $.bol_comment],
 
-  CLEAR full_data.
+  conflicts: ($) => [
+    // FUNCTION name. body ENDFUNCTION. vs macro_include for the same tokens
+    [$.function_implementation, $.macro_include],
+    // constructor_expression body: MAPPING/EXCEPT/WHERE clauses vs _general_expression_position
+    [$.constructor_mapping_clause, $.comp_spec],
+    [$.constructor_expression, $.macro_include],
+  ],
 
-  " Load prefixes into memory
-  IF st_prefix_loaded = abap_false.
-    SELECT * FROM zstreetprefix INTO TABLE @st_prefix.
-    st_prefix_loaded = abap_true.
-  ENDIF.
+  rules: {
+    program: ($) => repeat($._statement),
 
-  " Load suffixes into memory
-  IF st_suffix_loaded = abap_false.
-    SELECT * FROM zstreetsuffix INTO TABLE @st_suffix.
-    st_suffix_loaded = abap_true.
-  ENDIF.
+    _statement: ($) =>
+      choice(
+        $.class_declaration,
+        $.class_implementation,
+        $.class_publication,
+        $.class_local_friend_publication,
+        $.interface_declaration,
+        $.function_implementation,
+        $.selection_screen_statement,
+        $.at_selection_screen_statement,
+        $.parameters_statement,
+        $.tables_statement,
+        $._implementation_statement,
+      ),
 
-  " Load secondary unit designators into memory
-  IF st_sec_unit_desig_loaded = abap_false.
-    SELECT * FROM zsecunitdesig INTO TABLE @st_secunitdesig.
-    st_sec_unit_desig_loaded = abap_true.
-  ENDIF.
+    _implementation_statement: ($) =>
+      choice(
+        $.variable_declaration,
+        $.chained_variable_declaration,
+        $.chained_structure_declaration,
+        $.loop_statement,
+        $.field_symbol_declaration,
+        $.chained_field_symbol_declaration,
+        $.exit_statement,
+        $.continue_statement,
+        $.report_statement,
+        $.if_statement,
+        $.return_statement,
+        $.check_statement,
+        $.assignment,
+        $.select_statement_obsolete,
+        $.read_table_statement,
+        $.try_catch_statement,
+        $.write_statement,
+        $.chained_write_statement,
+        $.call_method,
+        $.call_method_static,
+        $.call_method_instance,
+        $.call_function,
+        $.raise_exception_statement,
+        $.clear_statement,
+        $.append_statement,
+        $.create_object_statement,
+        $.include_statement,
+        $.macro_include,
+        $.raise_statement,
+        $.append_statement_obsolete,
+        $.sort_statement,
+        $.case_statement,
+        $.concatenate_statement,
+        $.condense_statement,
+        $.replace_statement,
+        $.delete_statement,
+        $.collect_statement,
+        $.translate_statement,
+        $.split_statement,
+        $.assign_statement,
+        $.move_corresponding_statement,
+        $.endselect_statement,
+      ),
 
+    class_declaration: ($) =>
+      seq(
+        kw("class"),
+        field("name", $.name),
+        kw("definition"),
+        optional(kw("public")),
+        optional(
+          seq(kw("inheriting"), kw("from"), field("superclass", $.name)),
+        ),
+        optional(kw("abstract")),
+        optional(kw("final")),
+        optional($._create_addition),
+        optional(seq(kw("shared"), kw("memory"), kw("enabled"))),
+        optional(
+          seq(
+            optional(kw("global")),
+            kw("friends"),
+            field("friends", repeat1($.name)),
+          ),
+        ),
+        ".",
+        optional($.public_section),
+        optional($.protected_section),
+        optional($.private_section),
+        kw("endclass"),
+        ".",
+      ),
 
-  IF p_contract IS NOT INITIAL.
+    _create_addition: ($) =>
+      seq(kw("create"), choice(kw("public"), kw("protected"), kw("private"))),
 
-    CALL FUNCTION 'ISU_GET_ACC_ADRESS_DATA'
-      EXPORTING
-        x_doc_type     = '2'
-        x_vkont        = p_contract
-      TABLES
-        yt_addressdata = it_addressdata
-      EXCEPTIONS
-        not_found      = 1
-        OTHERS         = 2.
-    READ TABLE it_addressdata INTO wa_addressdata INDEX 1.
-    IF sy-subrc = 0.
-      DATA(lv_addrnumber) =  wa_addressdata-addrnumber.
-      DATA(lv_perno) = wa_addressdata-persnumber.
-    ENDIF.
+    public_section: ($) =>
+      seq(kw("public"), kw("section"), ".", repeat($._class_components)),
 
-    SELECT SINGLE * FROM  adrc
-     INTO @DATA(st_adrc)
-      WHERE  addrnumber  = @lv_addrnumber.
+    protected_section: ($) =>
+      seq(kw("protected"), kw("section"), ".", repeat($._class_components)),
 
-    SELECT SINGLE gpart FROM fkkvkp
-      INTO @DATA(lv_bp_number)
-      WHERE vkont = @p_contract.
+    private_section: ($) =>
+      seq(kw("private"), kw("section"), ".", repeat($._class_components)),
 
-    IF sy-subrc = 0.
+    _class_components: ($) =>
+      choice(
+        $.variable_declaration,
+        alias($.method_declaration_class, $.method_declaration),
+        $.constructor_declaration,
+        $.method_redefinition,
+        alias($.class_method_declaration_class, $.class_method_declaration),
+        $.class_constructor_declaration,
+      ),
 
-      full_data-vkont = p_contract.
+    class_implementation: ($) =>
+      seq(
+        kw("class"),
+        field("name", $.name),
+        kw("implementation"),
+        ".",
+        repeat($.method_implementation),
+        kw("endclass"),
+        ".",
+      ),
 
-      SELECT name_org1, name_last, name_first, name_grp1
-        INTO TABLE @DATA(it_name) UP TO 1 ROWS
-        FROM but000
-        WHERE partner = @lv_bp_number
-        ORDER BY PRIMARY KEY.
+    method_declaration_class: ($) =>
+      seq(
+        kw("methods"),
+        field("name", $.name),
+        optional(choice(kw("abstract"), kw("final"))),
+        field(
+          "importing_parameters",
+          optional($._method_declaration_importing),
+        ),
+        field(
+          "exporting_parameters",
+          optional($._method_declaration_exporting),
+        ),
+        field("changing_parameters", optional($._method_declaration_changing)),
+        optional($.returning_parameter),
+        field("raising", optional($._method_declaration_raising)),
+        field("exceptions", optional($._method_declaration_exceptions)),
+        ".",
+      ),
 
-      "---  Get the Full Name/Company Name
-      LOOP AT it_name ASSIGNING FIELD-SYMBOL(<fs_name>).
-        DATA(lv_full_name) = COND #( WHEN <fs_name>-name_org1 IS NOT INITIAL
-                                     THEN <fs_name>-name_org1
-                                     WHEN <fs_name>-name_org1 IS INITIAL AND <fs_name>-name_last IS NOT INITIAL
-                                     THEN |{ <fs_name>-name_first } { <fs_name>-name_last }|
-                                     ELSE  <fs_name>-name_org1 ).
+    _method_declaration_importing: ($) =>
+      seq(kw("importing"), repeat1($.method_parameters)),
 
-        full_data-full_name = lv_full_name.
+    _method_declaration_exporting: ($) =>
+      seq(kw("exporting"), repeat1($.method_parameters)),
 
-      ENDLOOP.
+    _method_declaration_changing: ($) =>
+      seq(kw("changing"), repeat1($.method_parameters)),
 
-      CALL FUNCTION 'ISU_ADDRESS_PROVIDE'
-        EXPORTING
-          x_address_type = 'A' " T = Standard Address (Mailing Address)
-          x_partner      = lv_bp_number
-          x_account      = p_contract
-          x_addrnumber   = lv_addrnumber
-          x_persnumber   = lv_perno
-        IMPORTING
-          y_eadrdat      = st_eadrdat
-        EXCEPTIONS
-          OTHERS         = 1.
-    ENDIF.
-  ELSE.
-    " Handle case where no contract is provided, if necessary.
-    RETURN.
-  ENDIF.
+    _method_declaration_raising: ($) =>
+      seq(
+        kw("raising"),
+        repeat1(choice($.name, seq(kw("resumable"), "(", $.name, ")"))),
+      ),
 
-  " If address retrieval failed, exit the function.
-  IF sy-subrc <> 0 OR st_eadrdat IS INITIAL.
-    RETURN.
-  ENDIF.
+    _method_declaration_exceptions: ($) =>
+      seq(kw("exceptions"), repeat1($.name)),
 
-  "--- Fill basic address fields first ---
-  full_data-city     = st_eadrdat-city1.
-  full_data-state    = st_eadrdat-region.
-  full_data-zip_code = st_eadrdat-post_code1.
+    method_parameters: ($) =>
+      seq(
+        choice(
+          seq(kw("value"), "(", $.name, ")"),
+          seq(kw("reference"), "(", $.name, ")"),
+          $._operand,
+        ),
+        $._typing,
+        optional(choice(kw("optional"), seq(kw("default"), $.name))),
+      ),
 
-  " CO
-  IF st_adrc-name_co IS NOT INITIAL.
-    full_data-name_co = st_adrc-name_co.
-  ENDIF.
+    returning_parameter: ($) =>
+      seq(kw("returning"), kw("value"), "(", $.name, ")", $.complete_typing),
 
-  "--- NEW: P.O. Box Validation ---
-  IF st_eadrdat-po_box IS NOT INITIAL.
-    " This is a P.O. Box address. Bypass street parsing.
-    full_data-po_box  = |P.O. BOX { st_eadrdat-po_box }|.
+    constructor_declaration: ($) =>
+      seq(
+        kw("methods"),
+        kw("constructor"),
+        optional(kw("final")),
+        field(
+          "importing_parameters",
+          optional($._method_declaration_importing),
+        ),
+        field("raising", optional($._method_declaration_raising)),
+        field("exceptions", optional($._method_declaration_exceptions)),
+        ".",
+      ),
 
-    IF st_eadrdat-po_box_cty IS NOT INITIAL.
-      full_data-city     = st_eadrdat-po_box_cty.
-    ENDIF.
+    class_constructor_declaration: ($) =>
+      seq(kw("class-methods"), kw("class_constructor"), "."),
 
-    full_data-zip_code = st_eadrdat-post_code2.
-    "  house_number = st_eadrdat-po_box.
-    " No prefix, suffix, or unit number for a PO Box.
-    RETURN. " Exit function as processing is complete.
-  ENDIF.
+    method_redefinition: ($) =>
+      seq(
+        kw("methods"),
+        $.name,
+        optional(kw("final")),
+        kw("redefinition"),
+        ".",
+      ),
 
-  "--- Street Parsing Logic (only if it's not a PO Box) ---
-  DATA(lv_street) = st_eadrdat-street.
-  TRANSLATE lv_street TO UPPER CASE.
-  REPLACE ALL OCCURRENCES OF REGEX '[.,]' IN lv_street WITH space.
-  CONDENSE lv_street.
+    class_method_declaration_class: ($) =>
+      seq(
+        kw("class-methods"),
+        field("name", $.name),
+        field(
+          "importing_parameters",
+          optional($._method_declaration_importing),
+        ),
+        field(
+          "exporting_parameters",
+          optional($._method_declaration_exporting),
+        ),
+        field("changing_parameters", optional($._method_declaration_changing)),
+        optional($.returning_parameter),
+        field("raising", optional($._method_declaration_raising)),
+        field("exceptions", optional($._method_declaration_exceptions)),
+        ".",
+      ),
 
-  SPLIT lv_street AT space INTO TABLE lt_words.
-  DELETE lt_words WHERE table_line IS INITIAL.
+    class_method_declaration_interface: ($) =>
+      seq(
+        kw("class-methods"),
+        field("name", $.name),
+        optional(seq(kw("default"), choice(kw("ignore"), kw("fail")))),
+        field(
+          "importing_parameters",
+          optional($._method_declaration_importing),
+        ),
+        field(
+          "exporting_parameters",
+          optional($._method_declaration_exporting),
+        ),
+        field("changing_parameters", optional($._method_declaration_changing)),
+        optional($.returning_parameter),
+        field("raising", optional($._method_declaration_raising)),
+        field("exceptions", optional($._method_declaration_exceptions)),
+        ".",
+      ),
 
-  IF lt_words IS INITIAL.
-    full_data-street_name = lv_street.
-  ELSE.
-    DATA(lv_first_word) = lt_words[ 1 ].
-    READ TABLE st_prefix ASSIGNING FIELD-SYMBOL(<fs_prefix>) WITH KEY description = lv_first_word.
-    IF sy-subrc <> 0.
-      READ TABLE st_prefix ASSIGNING <fs_prefix> WITH KEY prefix = lv_first_word.
-    ENDIF.
-    IF sy-subrc = 0.
-      full_data-street_prefix = <fs_prefix>-prefix.
-      DELETE lt_words INDEX 1.
-    ENDIF.
+    method_implementation: ($) =>
+      seq(
+        kw("method"),
+        field("name", $.name),
+        ".",
+        optional($.method_body),
+        kw("endmethod"),
+        ".",
+      ),
 
-    IF lt_words IS NOT INITIAL.
-      DATA(lv_last_word) = lt_words[ lines( lt_words ) ].
-      READ TABLE st_suffix ASSIGNING FIELD-SYMBOL(<fs_suffix>) WITH KEY description = lv_last_word.
-      IF sy-subrc <> 0.
-        READ TABLE st_suffix ASSIGNING <fs_suffix> WITH KEY suffix = lv_last_word.
-      ENDIF.
-      IF sy-subrc = 0.
-        full_data-street_suffix = <fs_suffix>-suffix.
-        DELETE lt_words INDEX lines( lt_words ).
-      ENDIF.
-    ENDIF.
+    method_body: ($) => repeat1($._implementation_statement),
 
-    IF lt_words IS NOT INITIAL.
-      CONCATENATE LINES OF lt_words INTO full_data-street_name SEPARATED BY space.
-    ELSE.
-      CLEAR full_data-street_name.
-    ENDIF.
-  ENDIF.
+    class_publication: ($) =>
+      seq(
+        kw("class"),
+        field("name", $.name),
+        kw("definition"),
+        kw("deferred"),
+        optional(kw("public")),
+        ".",
+      ),
 
-  full_data-house_number = st_eadrdat-house_num1.
+    class_local_friend_publication: ($) =>
+      seq(
+        kw("class"),
+        field("name", $.name),
+        kw("definition"),
+        kw("local"),
+        kw("friends"),
+        field("friends", repeat1($.name)),
+        ".",
+      ),
 
-  " Use the correct variable for the secondary unit.
-  lv_raw_second_unit = COND #( WHEN st_eadrdat-haus_num2_vbs IS NOT INITIAL
-                               THEN st_eadrdat-haus_num2_vbs
-                               ELSE st_eadrdat-house_num2 ).
+    interface_declaration: ($) =>
+      seq(
+        kw("interface"),
+        field("name", $.name),
+        optional(kw("public")),
+        ".",
+        repeat($._interface_components),
+        kw("endinterface"),
+        ".",
+      ),
 
-  "--- Parse the Secondary Unit Designator and Number ---
-  IF lv_raw_second_unit IS NOT INITIAL.
-    TRANSLATE lv_raw_second_unit TO UPPER CASE.
-    CONDENSE lv_raw_second_unit.
+    _interface_components: ($) =>
+      choice(
+        $.variable_declaration,
+        alias($.method_declaration_interface, $.method_declaration),
+        alias($.class_method_declaration_interface, $.class_method_declaration),
+      ),
 
-    SPLIT lv_raw_second_unit AT space INTO TABLE lt_second_unit_words.
+    method_declaration_interface: ($) =>
+      seq(
+        kw("methods"),
+        field("name", $.name),
+        optional(seq(kw("default"), choice(kw("ignore"), kw("fail")))),
+        field(
+          "importing_parameters",
+          optional($._method_declaration_importing),
+        ),
+        field(
+          "exporting_parameters",
+          optional($._method_declaration_exporting),
+        ),
+        field("changing_parameters", optional($._method_declaration_changing)),
+        optional($.returning_parameter),
+        field("raising", optional($._method_declaration_raising)),
+        field("exceptions", optional($._method_declaration_exceptions)),
+        ".",
+      ),
 
-    LOOP AT lt_second_unit_words ASSIGNING FIELD-SYMBOL(<fs_word>).
-      READ TABLE st_secunitdesig ASSIGNING FIELD-SYMBOL(<fs_desig>) WITH KEY designator = <fs_word>.
-      IF sy-subrc <> 0.
-        READ TABLE st_secunitdesig ASSIGNING <fs_desig> WITH KEY abbreviation = <fs_word>.
-      ENDIF.
+    _typing: ($) => choice($.generic_typing, $.complete_typing),
 
-      IF sy-subrc = 0.
-        full_data-2nd_unit_desc = <fs_desig>-abbreviation.
-      ELSE.
-        APPEND <fs_word> TO lt_second_unit_number_parts.
-      ENDIF.
-    ENDLOOP.
+    generic_typing: ($) =>
+      choice(seq(kw("type"), $.generic_type), seq(kw("like"), $.name)),
 
-    IF lt_second_unit_number_parts IS NOT INITIAL.
-      CONCATENATE LINES OF lt_second_unit_number_parts INTO full_data-2nd_unit_number. " No separator needed
-      REPLACE ALL OCCURRENCES OF '#' IN full_data-2nd_unit_number WITH ''.
-      CONDENSE full_data-2nd_unit_number.
-    ENDIF.
-  ENDIF.
+    complete_typing: ($) =>
+      choice(
+        seq(kw("type"), alias($.name, $.type)),
+        seq(kw("type"), kw("ref"), kw("to"), alias($.name, $.type)),
+      ),
 
-ENDFUNCTION.
+    generic_type: ($) =>
+      choice(
+        kw("any"),
+        seq(kw("any"), kw("table")),
+        kw("field-symbol"),
+      ),
+
+    _data_object_typing: ($) =>
+      choice(
+        $._data_object_typing_normal,
+        $._data_object_typing_reference,
+        $._data_object_typing_itabs,
+      ),
+
+    _data_object_typing_normal: ($) =>
+      seq(
+        choice(
+          seq(
+            kw("type"),
+            optional(seq(kw("line"), kw("of"))),
+            alias($.name, $.type),
+          ),
+          seq(kw("like"), optional(seq(kw("line"), kw("of"))), $._data_object),
+        ),
+        optional(
+          seq(kw("value"), choice($.name, seq(kw("is"), kw("initial")))),
+        ),
+        optional(kw("read-only")),
+      ),
+
+    _data_object_typing_reference: ($) =>
+      seq(
+        choice(
+          seq(kw("type"), kw("ref"), kw("to"), alias($.name, $.type)),
+          seq(kw("like"), kw("ref"), kw("to"), $.name),
+        ),
+        optional(seq(kw("value"), kw("is"), kw("initial"))),
+        optional(kw("read-only")),
+      ),
+
+    _data_object_typing_itabs: ($) =>
+      seq(
+        choice(
+          seq(
+            kw("type"),
+            choice(optional(kw("standard")), kw("sorted"), kw("hashed")),
+            kw("table"),
+            kw("of"),
+            optional(seq(kw("ref"), kw("to"))),
+            alias($.name, $.type),
+          ),
+          seq(
+            kw("like"),
+            choice(optional(kw("standard")), kw("sorted"), kw("hashed")),
+            kw("table"),
+            kw("of"),
+            $.name,
+          ),
+        ),
+        optional(
+          seq(
+            kw("with"),
+            choice(
+              seq(
+                optional(choice(kw("unique"), kw("non-unique"))),
+                kw("key"),
+                $.name,
+              ),
+              seq(kw("default"), kw("key")),
+            ),
+          ),
+        ),
+      ),
+
+    variable_declaration: ($) =>
+      seq(
+        choice(kw("data"), kw("statics"), kw("class-data")),
+        field("name", $.name),
+        field("typing", alias($._data_object_typing, $.typing)),
+        ".",
+      ),
+
+    chained_variable_declaration: ($) =>
+      seq(
+        choice(kw("data"), kw("statics"), kw("class-data")),
+        ":",
+        repeat1(choice($.variable, seq(",", $.variable))),
+        ".",
+      ),
+
+    variable: ($) => seq($.name, alias($._data_object_typing, $.typing)),
+
+    chained_structure_declaration: ($) =>
+      seq(
+        choice(kw("data"), kw("statics"), kw("class-data")),
+        ":",
+        kw("begin"),
+        kw("of"),
+        alias($.name, $.strucure_name),
+        optional(kw("read-only")),
+        ",",
+        alias(repeat1($.structure_component), $.structure_components),
+        kw("end"),
+        kw("of"),
+        alias($.name, $.strucure_name),
+        ".",
+      ),
+
+    structure_component: ($) => seq($.name, $._typing, ","),
+
+    field_symbol_declaration: ($) =>
+      seq(
+        kw("field-symbols"),
+        alias($.field_symbol_name, $.name),
+        $._typing,
+        ".",
+      ),
+
+    chained_field_symbol_declaration: ($) =>
+      seq(
+        kw("field-symbols"),
+        ":",
+        repeat1(choice($.field_symbol, seq(",", $.field_symbol))),
+        ".",
+      ),
+
+    field_symbol: ($) => seq(alias($.field_symbol_name, $.name), $._typing),
+
+    loop_statement: ($) =>
+      seq(
+        kw("loop"),
+        kw("at"),
+        alias($.name, $.itab),
+        choice(
+          seq(kw("into"), choice($.inline_declaration, alias($.name, $.result))),
+          seq(kw("assigning"), choice($.inline_fs_declaration, alias($.field_symbol_name, $.result))),
+        ),
+        optional(
+          seq(
+            optional(seq(kw("from"), $._general_expression_position)),
+            optional(seq(kw("to"), $._general_expression_position)),
+            optional(seq(kw("step"), $._general_expression_position)),
+          ),
+        ),
+        ".",
+        repeat($._statement),
+        kw("endloop"),
+        ".",
+      ),
+
+    exit_statement: ($) => seq(kw("exit"), "."),
+    continue_statement: ($) => seq(kw("continue"), "."),
+    return_statement: ($) => seq(kw("return"), "."),
+    report_statement: ($) => seq(kw("report"), $.name, "."),
+
+    if_statement: ($) =>
+      seq(
+        kw("if"),
+        $._logical_expression,
+        ".",
+        repeat($._statement),
+        repeat(
+          seq(kw("elseif"), $._logical_expression, ".", repeat($._statement)),
+        ),
+        optional(seq(kw("else"), ".", repeat($._statement))),
+        kw("endif"),
+        ".",
+      ),
+
+    check_statement: ($) => seq(kw("check"), $._logical_expression, "."),
+
+    _logical_expression: ($) =>
+      choice(
+        $.comparison_expression,
+        prec.right(4, seq(kw("not"), $._logical_expression)),
+        prec.left(
+          1,
+          seq($._logical_expression, kw("or"), $._logical_expression),
+        ),
+        prec.left(
+          2,
+          seq($._logical_expression, kw("and"), $._logical_expression),
+        ),
+        prec.left(5, seq($._operand, kw("is"), kw("initial"))),
+        prec.left(5, seq($._operand, kw("is"), kw("not"), kw("initial"))),
+        prec.left(5, seq($._operand, kw("is"), kw("bound"))),
+        prec.left(5, seq($._operand, kw("is"), kw("not"), kw("bound"))),
+      ),
+
+    comparison_expression: ($) =>
+      seq(
+        $._general_expression_position,
+        choice("=", kw("eq"), "<>", kw("ne")),
+        $._general_expression_position,
+      ),
+
+    _general_expression_position: ($) =>
+      choice(
+        $.numeric_literal,
+        $.character_literal,
+        $.string_template,
+        $.text_symbol,
+        $._data_object,
+        $._calculation_expression,
+        $.constructor_expression,
+        $.host_variable,
+      ),
+
+    _calculation_expression: ($) => choice($.arithmetic_expression),
+
+    arithmetic_expression: ($) =>
+      choice(
+        prec.left(
+          1,
+          seq(
+            $._general_expression_position,
+            "+",
+            $._general_expression_position,
+          ),
+        ),
+        prec.left(
+          1,
+          seq(
+            $._general_expression_position,
+            "-",
+            $._general_expression_position,
+          ),
+        ),
+        prec.left(
+          2,
+          seq(
+            $._general_expression_position,
+            "*",
+            $._general_expression_position,
+          ),
+        ),
+        prec.left(
+          2,
+          seq(
+            $._general_expression_position,
+            "/",
+            $._general_expression_position,
+          ),
+        ),
+        prec.left(
+          2,
+          seq(
+            $._general_expression_position,
+            "DIV",
+            $._general_expression_position,
+          ),
+        ),
+        prec.left(
+          2,
+          seq(
+            $._general_expression_position,
+            "MOD",
+            $._general_expression_position,
+          ),
+        ),
+        prec.left(
+          3,
+          seq(
+            $._general_expression_position,
+            "**",
+            $._general_expression_position,
+          ),
+        ),
+        // String concatenation operator
+        prec.left(
+          1,
+          seq(
+            $._general_expression_position,
+            "&&",
+            $._general_expression_position,
+          ),
+        ),
+      ),
+
+    _writeable_expression: ($) =>
+      choice($.inline_declaration, $.table_expression),
+
+    table_expression: ($) =>
+      seq(
+        field("itab", $.name),
+        token.immediate("[ "),
+        field(
+          "line_spec",
+          choice(
+            $._general_expression_position,
+            alias($._table_expression_free_key, $.free_key),
+          ),
+        ),
+        "]",
+      ),
+
+    _table_expression_free_key: ($) => repeat1($.comp_spec),
+
+    comp_spec: ($) =>
+      seq(
+        field("component", $.name),
+        "=",
+        field("operand", $._general_expression_position),
+      ),
+
+    // ── SELECT ────────────────────────────────────────────────────
+    select_modifier: ($) => choice(kw("single"), kw("distinct")),
+
+    select_statement_obsolete: ($) =>
+      seq(
+        kw("select"),
+        optional($.select_modifier),
+        $.select_list,
+        choice(
+          // Style A: SELECT fields FROM table INTO target ...
+          seq(
+            optional(seq(kw("up"), kw("to"), $._general_expression_position, kw("rows"))),
+            kw("from"),
+            alias($.name, $.data_source),
+            alias($._select_target, $.target),
+          ),
+          // Style B: SELECT fields INTO target UP TO n ROWS FROM table ...
+          seq(
+            alias($._select_target, $.target),
+            optional(seq(kw("up"), kw("to"), $._general_expression_position, kw("rows"))),
+            kw("from"),
+            alias($.name, $.data_source),
+          ),
+        ),
+        optional(
+          seq(optional($.for_all_entries), alias($._where_clause, $.where)),
+        ),
+        optional(
+          seq(
+            kw("order"),
+            kw("by"),
+            choice(
+              seq(kw("primary"), kw("key")),
+              repeat1(seq($.name, optional(choice(kw("ascending"), kw("descending"))))),
+            ),
+          ),
+        ),
+        ".",
+      ),
+
+    select_list: ($) => choice("*", seq($.name, repeat(seq(",", $.name)))),
+
+    _select_target: ($) =>
+      choice(
+        seq(kw("into"), "(", repeat1(seq(optional(","), $._host_var)), ")"),
+        seq(
+          kw("into"),
+          optional(seq(kw("corresponding"), kw("fields"), kw("of"))),
+          $._host_var,
+        ),
+        seq(
+          choice(kw("into"), kw("appending")),
+          optional(seq(kw("corresponding"), kw("fields"), kw("of"))),
+          kw("table"),
+          $._host_var,
+        ),
+      ),
+
+    _host_var: ($) =>
+      seq(optional("@"), choice($.inline_declaration, $._data_object)),
+
+    host_variable: ($) => seq("@", $._data_object),
+
+    for_all_entries: ($) =>
+      seq(kw("for"), kw("all"), kw("entries"), kw("in"), $.name),
+
+    _where_clause: ($) => seq(kw("where"), $._sql_condition),
+
+    _sql_condition: ($) => $._logical_expression,
+
+    // ── READ TABLE ────────────────────────────────────────────────
+    read_table_statement: ($) =>
+      seq(
+        kw("read"),
+        kw("table"),
+        $.name,
+        choice(
+          seq($.line_spec, $._read_table_result),
+          seq($._read_table_result, $.line_spec),
+          seq(kw("index"), $._general_expression_position, optional($._read_table_result)),
+          seq($._read_table_result, kw("index"), $._general_expression_position),
+        ),
+        ".",
+      ),
+
+    line_spec: ($) =>
+      seq(
+        kw("with"),
+        kw("key"),
+        repeat1(seq($.name, "=", $._general_expression_position)),
+        optional(seq(kw("binary"), kw("search"))),
+      ),
+
+    _read_table_result: ($) =>
+      choice(
+        seq(kw("into"), choice($.inline_declaration, $.name)),
+        seq(kw("assigning"), choice($.inline_fs_declaration, $.field_symbol_name)),
+        seq(kw("transporting"), kw("no"), kw("fields")),
+      ),
+
+    _data_object: ($) =>
+      choice(
+        $.name,
+        $.field_symbol_name,
+        $.structured_data_object,
+        $.attribute_access_static,
+      ),
+
+    structured_data_object: ($) =>
+      seq(
+        alias(choice($.name, $.field_symbol_name), $.structure_name),
+        repeat1(seq(token.immediate("-"), alias($.name, $.component_name))),
+      ),
+
+    attribute_access_static: ($) =>
+      seq(
+        field("class", $.name),
+        token.immediate("=>"),
+        field("attribute", $.name),
+      ),
+
+    assignment: ($) =>
+      seq(
+        choice($._data_object, $._writeable_expression),
+        "=",
+        $._general_expression_position,
+        ".",
+      ),
+
+    try_catch_statement: ($) =>
+      seq(
+        kw("try"),
+        ".",
+        optional($.try_block),
+        repeat($.catch_statement),
+        kw("endtry"),
+        ".",
+      ),
+
+    try_block: ($) => repeat1($._statement),
+
+    catch_statement: ($) =>
+      seq(
+        kw("catch"),
+        field("exception", $.name),
+        optional(seq(kw("into"), field("oref", $.name))),
+        ".",
+        optional($.catch_block),
+      ),
+
+    catch_block: ($) => repeat1($._statement),
+
+    write_statement: ($) =>
+      seq(kw("write"), optional("/"), $._general_expression_position, "."),
+
+    chained_write_statement: ($) =>
+      seq(
+        kw("write"),
+        ":",
+        optional("/"),
+        repeat1(
+          choice(
+            $._general_expression_position,
+            seq(",", $._general_expression_position),
+          ),
+        ),
+        ".",
+      ),
+
+    call_method: ($) =>
+      seq(
+        field("name", $.name),
+        token.immediate("("),
+        field(
+          "parameters",
+          optional(
+            choice(
+              $._general_expression_position,
+              $.parameter_list,
+              $._explicit_parameter_list,
+            ),
+          ),
+        ),
+        ")",
+        ".",
+      ),
+
+    parameter_list: ($) => repeat1($.parameter_binding),
+
+    _explicit_parameter_list: ($) =>
+      seq(
+        repeat1(
+          choice(
+            seq(kw("exporting"), $.parameter_list),
+            seq(kw("importing"), $.parameter_list),
+            seq(kw("changing"), $.parameter_list),
+            seq(kw("receiving"), $.parameter_binding),
+          ),
+        ),
+      ),
+
+    parameter_list_exporting: ($) =>
+      repeat1(alias($.parameter_binding_exporting, $.parameter_binding)),
+
+    parameter_binding: ($) =>
+      seq(
+        field("formal_parameter", $.name),
+        "=",
+        field("actual_parameter", $._general_expression_position),
+      ),
+
+    parameter_binding_exporting: ($) =>
+      seq(
+        field("formal_parameter", $.name),
+        "=",
+        field("actual_parameter", $.name),
+      ),
+
+    call_method_static: ($) =>
+      seq(
+        field("class_name", $.name),
+        token.immediate("=>"),
+        field("method_name", $.name),
+        token.immediate("("),
+        field(
+          "parameters",
+          optional(
+            choice(
+              $._general_expression_position,
+              $.parameter_list,
+              $._explicit_parameter_list,
+            ),
+          ),
+        ),
+        ")",
+        ".",
+      ),
+
+    call_method_instance: ($) =>
+      seq(
+        field("instance_name", $.name),
+        token.immediate("->"),
+        field("method_name", $.name),
+        token.immediate("("),
+        field(
+          "parameters",
+          optional(
+            choice(
+              $._general_expression_position,
+              $.parameter_list,
+              $._explicit_parameter_list,
+            ),
+          ),
+        ),
+        ")",
+        ".",
+      ),
+
+    call_function: ($) =>
+      seq(
+        kw("call"),
+        kw("function"),
+        field("name", $.character_literal),
+        field("parameters", optional($._function_parameter_list)),
+        field("exceptions", optional($.exception_list)),
+        ".",
+      ),
+
+    _function_parameter_list: ($) =>
+      repeat1(
+        choice(
+          seq(
+            kw("exporting"),
+            alias($.parameter_list_exporting, $.parameter_list),
+          ),
+          seq(kw("importing"), $.parameter_list),
+          seq(kw("changing"), $.parameter_list),
+          seq(kw("tables"), $.parameter_list),
+        ),
+      ),
+
+    exception_list: ($) =>
+      seq(kw("exceptions"), repeat1($.return_code_binding)),
+
+    return_code_binding: ($) =>
+      seq(
+        field("exception", $.name),
+        "=",
+        field("return_code", $.numeric_literal),
+      ),
+
+    raise_exception_statement: ($) =>
+      seq(
+        kw("raise"),
+        kw("exception"),
+        choice(
+          seq(
+            kw("type"),
+            field("class", $.name),
+            optional(
+              field("parameters", seq(kw("exporting"), $.parameter_list)),
+            ),
+          ),
+          field("oref", $.name),
+        ),
+        ".",
+      ),
+
+    clear_statement: ($) => seq(kw("clear"), $._data_object, "."),
+
+    // ── APPEND ────────────────────────────────────────────────────
+    append_statement: ($) =>
+      seq(
+        kw("append"),
+        choice(
+          seq(
+            kw("initial"),
+            kw("line"),
+            kw("to"),
+            field("itab", $.name),
+            optional(
+              seq(kw("assigning"), alias($.field_symbol_name, $.result)),
+            ),
+          ),
+          seq(kw("lines"), kw("of"), $.name, kw("to"), $.name),
+          seq(
+            field("line_spec", $._data_object),
+            kw("to"),
+            field("itab", $.name),
+          ),
+        ),
+        ".",
+      ),
+
+    append_statement_obsolete: ($) =>
+      seq(kw("append"), field("itab", $.name), "."),
+
+    create_object_statement: ($) =>
+      seq(
+        kw("create"),
+        kw("object"),
+        $.name,
+        optional(seq(kw("exporting"), field("parameters", $.parameter_list))),
+        ".",
+      ),
+
+    include_statement: ($) =>
+      seq(
+        kw("include"),
+        choice($.name, $.field_symbol_name),
+        optional(seq(kw("if"), kw("found"))),
+        ".",
+      ),
+
+    macro_include: ($) =>
+      seq(
+        field("name", $.name),
+        optional(
+          alias(repeat1($._general_expression_position), $.parameter_list),
+        ),
+        ".",
+      ),
+
+    function_implementation: ($) =>
+      prec.dynamic(1,
+        seq(
+          kw("function"),
+          field("name", $.name),
+          ".",
+          repeat($._implementation_statement),
+          $.function_end,
+          ".",
+        ),
+      ),
+
+    function_end: ($) => prec.dynamic(1, kw("endfunction")),
+
+    raise_statement: ($) => seq(kw("raise"), $.name, "."),
+
+    sort_statement: ($) =>
+      seq(
+        kw("sort"),
+        $.name,
+        optional(
+          seq(
+            kw("by"),
+            repeat1(
+              seq($.name, optional(choice(kw("ascending"), kw("descending")))),
+            ),
+          ),
+        ),
+        ".",
+      ),
+
+    case_statement: ($) =>
+      seq(
+        kw("case"),
+        $._general_expression_position,
+        ".",
+        repeat($.when_clause),
+        kw("endcase"),
+        ".",
+      ),
+
+    when_clause: ($) =>
+      seq(
+        kw("when"),
+        choice(
+          kw("others"),
+          // CASE abap_true. WHEN condition IS INITIAL AND other IS NOT INITIAL.
+          $._logical_expression,
+          // CASE lv_var. WHEN 'A' OR 'B'.
+          seq(
+            $._general_expression_position,
+            repeat(seq(kw("or"), $._general_expression_position)),
+          ),
+        ),
+        ".",
+        repeat($._implementation_statement),
+      ),
+
+    concatenate_statement: ($) =>
+      seq(
+        kw("concatenate"),
+        repeat1($._data_object),
+        kw("into"),
+        $._data_object,
+        optional(
+          seq(kw("separated"), kw("by"), $._general_expression_position),
+        ),
+        ".",
+      ),
+
+    condense_statement: ($) =>
+      seq(
+        kw("condense"),
+        $._data_object,
+        optional(seq(kw("no"), kw("gaps"))),
+        ".",
+      ),
+
+    replace_statement: ($) =>
+      seq(
+        kw("replace"),
+        optional(choice(kw("first"), kw("all"))),
+        optional(choice(kw("occurrences"), kw("occurrence"))),
+        optional(kw("of")),
+        $._general_expression_position,
+        kw("in"),
+        $._data_object,
+        kw("with"),
+        $._general_expression_position,
+        ".",
+      ),
+
+    delete_statement: ($) =>
+      seq(
+        kw("delete"),
+        choice(
+          seq($.name, kw("where"), $._logical_expression),
+          seq(
+            kw("adjacent"),
+            kw("duplicates"),
+            kw("from"),
+            $.name,
+            optional(seq(kw("comparing"), repeat1($.name))),
+          ),
+          seq($.name, kw("index"), $._general_expression_position),
+        ),
+        ".",
+      ),
+
+    collect_statement: ($) =>
+      seq(kw("collect"), $.name, kw("into"), $.name, "."),
+
+    // ── Report / selection-screen constructs ──────────────────────
+    tables_statement: ($) =>
+      seq(
+        kw("tables"),
+        choice(
+          seq(":", repeat1(choice($.name, seq(",", $.name)))),
+          $.name,
+        ),
+        ".",
+      ),
+
+    selection_screen_statement: ($) =>
+      seq(
+        kw("selection-screen"),
+        choice(
+          seq(
+            kw("begin"),
+            kw("of"),
+            kw("block"),
+            $.name,
+            optional(
+              seq(
+                kw("with"),
+                kw("frame"),
+                optional(seq(kw("title"), $._general_expression_position)),
+              ),
+            ),
+          ),
+          seq(kw("end"), kw("of"), kw("block"), $.name),
+          seq(kw("skip"), optional($.numeric_literal)),
+          seq(kw("comment"), $._general_expression_position, optional(seq(kw("for"), kw("field"), $.name))),
+          seq(kw("pushbutton"), $._general_expression_position, $.name, optional(seq(kw("user-command"), $.name))),
+          $._general_expression_position,
+        ),
+        ".",
+      ),
+
+    at_selection_screen_statement: ($) =>
+      seq(
+        kw("at"),
+        kw("selection-screen"),
+        optional(
+          choice(
+            seq(kw("on"), kw("value-request"), kw("for"), $.name),
+            seq(kw("on"), kw("block"), $.name),
+            seq(kw("on"), $.name),
+            kw("output"),
+          ),
+        ),
+        ".",
+      ),
+
+    parameters_statement: ($) =>
+      seq(
+        kw("parameters"),
+        choice(
+          seq(":", repeat1(choice($.parameter_def, seq(",", $.parameter_def)))),
+          $.parameter_def,
+        ),
+        ".",
+      ),
+
+    parameter_def: ($) =>
+      seq(
+        $.name,
+        optional($._data_object_typing_normal),
+        repeat(
+          choice(
+            seq(kw("default"), $._general_expression_position),
+            seq(kw("radiobutton"), kw("group"), $.name),
+            seq(kw("user-command"), $.name),
+            seq(kw("modif"), kw("id"), $.name),
+            kw("obligatory"),
+            seq(kw("as"), choice(kw("checkbox"), kw("listbox"))),
+            seq(kw("for"), kw("field"), $.name),
+            seq(kw("visible"), kw("length"), $.numeric_literal),
+            seq(kw("lower"), kw("case")),
+            kw("no-display"),
+          ),
+        ),
+      ),
+
+    translate_statement: ($) =>
+      seq(
+        kw("translate"),
+        $._data_object,
+        kw("to"),
+        choice(seq(kw("upper"), kw("case")), seq(kw("lower"), kw("case"))),
+        ".",
+      ),
+
+    split_statement: ($) =>
+      seq(
+        kw("split"),
+        $._general_expression_position,
+        kw("at"),
+        $._general_expression_position,
+        kw("into"),
+        choice(
+          seq(kw("table"), $._data_object),
+          repeat1($._data_object),
+        ),
+        ".",
+      ),
+
+    // ── Inline declaration & constructor expressions ───────────────
+    inline_declaration: ($) => seq(kw("data"), "(", field("name", $.name), ")"),
+
+    inline_fs_declaration: ($) =>
+      seq(kw("field-symbol"), "(", $.field_symbol_name, ")"),
+
+    constructor_expression: ($) =>
+      seq(
+        choice(
+          kw("cond"),
+          kw("switch"),
+          kw("value"),
+          kw("new"),
+          kw("conv"),
+          kw("cast"),
+          kw("filter"),
+          kw("reduce"),
+          kw("corresponding"),
+        ),
+        choice(alias($.name, $.type), alias("#", $.type)),
+        "(",
+        repeat(
+          choice(
+            $.constructor_when_clause,
+            $.constructor_else_clause,
+            $.constructor_for_clause,
+            $.constructor_mapping_clause,
+            $.constructor_except_clause,
+            $.constructor_using_key_clause,
+            $.constructor_where_clause,
+            $.comp_spec,
+            $._general_expression_position,
+          ),
+        ),
+        ")",
+      ),
+
+    // ELSE value  /  ELSE THROW cx_exception( )
+    constructor_else_clause: ($) =>
+      seq(
+        kw("else"),
+        choice(
+          seq(kw("throw"), $.name, "(", ")"),
+          $._general_expression_position,
+        ),
+      ),
+
+    // FOR x IN itab [WHERE ( cond )] — used inside VALUE/REDUCE/FILTER
+    constructor_for_clause: ($) =>
+      seq(
+        kw("for"),
+        $.name,
+        kw("in"),
+        $._general_expression_position,
+        optional(seq(kw("where"), "(", $._constructor_condition, ")")),
+      ),
+
+    // CORRESPONDING #( src MAPPING a = b c = d )
+    constructor_mapping_clause: ($) =>
+      prec.left(seq(kw("mapping"), repeat1($.comp_spec))),
+
+    // CORRESPONDING #( src EXCEPT field )
+    constructor_except_clause: ($) =>
+      seq(kw("except"), repeat1($.name)),
+
+    // FILTER #( itab USING KEY keyname ... )
+    constructor_using_key_clause: ($) =>
+      seq(kw("using"), kw("key"), $.name),
+
+    // FILTER #( itab ... WHERE cond )
+    constructor_where_clause: ($) =>
+      seq(kw("where"), $._constructor_condition),
+
+    constructor_when_clause: ($) =>
+      seq(
+        kw("when"),
+        $._constructor_condition,
+        kw("then"),
+        $._general_expression_position,
+      ),
+
+    _constructor_condition: ($) =>
+      choice(
+        prec.left(
+          2,
+          seq($._constructor_condition, kw("and"), $._constructor_condition),
+        ),
+        prec.left(
+          1,
+          seq($._constructor_condition, kw("or"), $._constructor_condition),
+        ),
+        prec.right(4, seq(kw("not"), $._constructor_condition)),
+        $.comparison_expression,
+        prec.left(5, seq($._operand, kw("is"), kw("initial"))),
+        prec.left(5, seq($._operand, kw("is"), kw("not"), kw("initial"))),
+        prec.left(5, seq($._operand, kw("is"), kw("bound"))),
+        prec.left(5, seq($._operand, kw("is"), kw("not"), kw("bound"))),
+        $._general_expression_position,
+      ),
+
+    // ── ABAP 7.4 statements ───────────────────────────────────────
+    assign_statement: ($) =>
+      seq(
+        kw("assign"),
+        $._general_expression_position,
+        kw("to"),
+        choice($.inline_fs_declaration, $.field_symbol_name),
+        optional(seq(kw("casting"), optional(seq(kw("like"), $._general_expression_position)))),
+        ".",
+      ),
+
+    move_corresponding_statement: ($) =>
+      seq(
+        kw("move-corresponding"),
+        $._data_object,
+        kw("to"),
+        $._data_object,
+        repeat(choice(
+          seq(kw("expanding"), kw("nested"), kw("tables")),
+          seq(kw("keeping"), kw("target"), kw("lines")),
+        )),
+        ".",
+      ),
+
+    endselect_statement: ($) => seq(kw("endselect"), "."),
+
+    // ── Terminals ─────────────────────────────────────────────────
+    // String template: |text {expr} more| — simplified (no embedded expr parsing)
+    string_template: ($) => /\|[^|]*\|/,
+
+    _operand: ($) => choice($._escaped_operand, $.name),
+    _escaped_operand: ($) => seq("!", $.name),
+    numeric_literal: ($) => /[0-9]+/,
+    character_literal: ($) => /'[^']*'/,
+    text_symbol: ($) => /text-[a-z0-9]{3}/i,
+    eol_comment: ($) => seq('"', /[^\n]*/),
+    bol_comment: ($) => seq("*", /[^\n]*/),
+    name: ($) => /[a-zA-Z_][a-zA-Z0-9_]{0,29}/i,
+    field_symbol_name: ($) => /<[a-zA-Z0-9_]{0,28}>/i,
+  },
+});
+
+/**
+ * ABAP word/keyword
+ * @param {string} word ABAP word as string
+ */
+function kw(word) {
+  return alias(new RegExp(word, "i"), word);
+}
 

@@ -8784,215 +8784,28 @@
                 "name": "constructor_when_clause"
               },
               {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "PATTERN",
-                      "value": "else",
-                      "flags": "i"
-                    },
-                    "named": false,
-                    "value": "else"
-                  },
-                  {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "SEQ",
-                        "members": [
-                          {
-                            "type": "ALIAS",
-                            "content": {
-                              "type": "PATTERN",
-                              "value": "throw",
-                              "flags": "i"
-                            },
-                            "named": false,
-                            "value": "throw"
-                          },
-                          {
-                            "type": "SYMBOL",
-                            "name": "name"
-                          },
-                          {
-                            "type": "STRING",
-                            "value": "("
-                          },
-                          {
-                            "type": "STRING",
-                            "value": ")"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "_general_expression_position"
-                      }
-                    ]
-                  }
-                ]
+                "type": "SYMBOL",
+                "name": "constructor_else_clause"
               },
               {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "PATTERN",
-                      "value": "for",
-                      "flags": "i"
-                    },
-                    "named": false,
-                    "value": "for"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "name"
-                  },
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "PATTERN",
-                      "value": "in",
-                      "flags": "i"
-                    },
-                    "named": false,
-                    "value": "in"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "_general_expression_position"
-                  },
-                  {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "SEQ",
-                        "members": [
-                          {
-                            "type": "ALIAS",
-                            "content": {
-                              "type": "PATTERN",
-                              "value": "where",
-                              "flags": "i"
-                            },
-                            "named": false,
-                            "value": "where"
-                          },
-                          {
-                            "type": "STRING",
-                            "value": "("
-                          },
-                          {
-                            "type": "SYMBOL",
-                            "name": "_constructor_condition"
-                          },
-                          {
-                            "type": "STRING",
-                            "value": ")"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "BLANK"
-                      }
-                    ]
-                  }
-                ]
+                "type": "SYMBOL",
+                "name": "constructor_for_clause"
               },
               {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "PATTERN",
-                      "value": "mapping",
-                      "flags": "i"
-                    },
-                    "named": false,
-                    "value": "mapping"
-                  },
-                  {
-                    "type": "REPEAT1",
-                    "content": {
-                      "type": "SYMBOL",
-                      "name": "comp_spec"
-                    }
-                  }
-                ]
+                "type": "SYMBOL",
+                "name": "constructor_mapping_clause"
               },
               {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "PATTERN",
-                      "value": "except",
-                      "flags": "i"
-                    },
-                    "named": false,
-                    "value": "except"
-                  },
-                  {
-                    "type": "REPEAT1",
-                    "content": {
-                      "type": "SYMBOL",
-                      "name": "name"
-                    }
-                  }
-                ]
+                "type": "SYMBOL",
+                "name": "constructor_except_clause"
               },
               {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "PATTERN",
-                      "value": "using",
-                      "flags": "i"
-                    },
-                    "named": false,
-                    "value": "using"
-                  },
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "PATTERN",
-                      "value": "key",
-                      "flags": "i"
-                    },
-                    "named": false,
-                    "value": "key"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "name"
-                  }
-                ]
+                "type": "SYMBOL",
+                "name": "constructor_using_key_clause"
               },
               {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "PATTERN",
-                      "value": "where",
-                      "flags": "i"
-                    },
-                    "named": false,
-                    "value": "where"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "_constructor_condition"
-                  }
-                ]
+                "type": "SYMBOL",
+                "name": "constructor_where_clause"
               },
               {
                 "type": "SYMBOL",
@@ -9008,6 +8821,221 @@
         {
           "type": "STRING",
           "value": ")"
+        }
+      ]
+    },
+    "constructor_else_clause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "else",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "else"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "PATTERN",
+                    "value": "throw",
+                    "flags": "i"
+                  },
+                  "named": false,
+                  "value": "throw"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "name"
+                },
+                {
+                  "type": "STRING",
+                  "value": "("
+                },
+                {
+                  "type": "STRING",
+                  "value": ")"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_general_expression_position"
+            }
+          ]
+        }
+      ]
+    },
+    "constructor_for_clause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "for",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "for"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "name"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "in",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "in"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_general_expression_position"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "PATTERN",
+                    "value": "where",
+                    "flags": "i"
+                  },
+                  "named": false,
+                  "value": "where"
+                },
+                {
+                  "type": "STRING",
+                  "value": "("
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_constructor_condition"
+                },
+                {
+                  "type": "STRING",
+                  "value": ")"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "constructor_mapping_clause": {
+      "type": "PREC_LEFT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "PATTERN",
+              "value": "mapping",
+              "flags": "i"
+            },
+            "named": false,
+            "value": "mapping"
+          },
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "SYMBOL",
+              "name": "comp_spec"
+            }
+          }
+        ]
+      }
+    },
+    "constructor_except_clause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "except",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "except"
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "name"
+          }
+        }
+      ]
+    },
+    "constructor_using_key_clause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "using",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "using"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "key",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "key"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "name"
+        }
+      ]
+    },
+    "constructor_where_clause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "where",
+            "flags": "i"
+          },
+          "named": false,
+          "value": "where"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_constructor_condition"
         }
       ]
     },
@@ -9613,6 +9641,14 @@
   "conflicts": [
     [
       "function_implementation",
+      "macro_include"
+    ],
+    [
+      "constructor_mapping_clause",
+      "comp_spec"
+    ],
+    [
+      "constructor_expression",
       "macro_include"
     ]
   ],
