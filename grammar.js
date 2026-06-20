@@ -69,6 +69,9 @@ module.exports = grammar({
         $.collect_statement,
         $.translate_statement,
         $.split_statement,
+        $.assign_statement,
+        $.move_corresponding_statement,
+        $.endselect_statement,
       ),
 
     class_declaration: ($) =>
@@ -531,6 +534,7 @@ module.exports = grammar({
       choice(
         $.numeric_literal,
         $.character_literal,
+        $.string_template,
         $.text_symbol,
         $._data_object,
         $._calculation_expression,
@@ -595,6 +599,15 @@ module.exports = grammar({
           seq(
             $._general_expression_position,
             "**",
+            $._general_expression_position,
+          ),
+        ),
+        // String concatenation operator
+        prec.left(
+          1,
+          seq(
+            $._general_expression_position,
+            "&&",
             $._general_expression_position,
           ),
         ),
@@ -1223,13 +1236,33 @@ module.exports = grammar({
           kw("cast"),
           kw("filter"),
           kw("reduce"),
+          kw("corresponding"),
         ),
         choice(alias($.name, $.type), alias("#", $.type)),
         "(",
         repeat(
           choice(
             $.constructor_when_clause,
-            seq(kw("else"), $._general_expression_position),
+            // ELSE value / ELSE THROW cx_class( )
+            seq(kw("else"), choice(
+              seq(kw("throw"), $.name, "(", ")"),
+              $._general_expression_position,
+            )),
+            // FOR x IN table [WHERE ( condition )] ( expr )
+            seq(
+              kw("for"),
+              $.name,
+              kw("in"),
+              $._general_expression_position,
+              optional(seq(kw("where"), "(", $._constructor_condition, ")")),
+            ),
+            // CORRESPONDING MAPPING / EXCEPT
+            seq(kw("mapping"), repeat1($.comp_spec)),
+            seq(kw("except"), repeat1($.name)),
+            // FILTER USING KEY keyname
+            seq(kw("using"), kw("key"), $.name),
+            // WHERE condition (FILTER)
+            seq(kw("where"), $._constructor_condition),
             $.comp_spec,
             $._general_expression_position,
           ),
@@ -1258,10 +1291,42 @@ module.exports = grammar({
         prec.right(4, seq(kw("not"), $._constructor_condition)),
         $.comparison_expression,
         prec.left(5, seq($._operand, kw("is"), kw("initial"))),
+        prec.left(5, seq($._operand, kw("is"), kw("not"), kw("initial"))),
+        prec.left(5, seq($._operand, kw("is"), kw("bound"))),
+        prec.left(5, seq($._operand, kw("is"), kw("not"), kw("bound"))),
         $._general_expression_position,
       ),
 
+    // ── ABAP 7.4 statements ───────────────────────────────────────
+    assign_statement: ($) =>
+      seq(
+        kw("assign"),
+        $._general_expression_position,
+        kw("to"),
+        choice($.inline_fs_declaration, $.field_symbol_name),
+        optional(seq(kw("casting"), optional(seq(kw("like"), $._general_expression_position)))),
+        ".",
+      ),
+
+    move_corresponding_statement: ($) =>
+      seq(
+        kw("move-corresponding"),
+        $._data_object,
+        kw("to"),
+        $._data_object,
+        repeat(choice(
+          seq(kw("expanding"), kw("nested"), kw("tables")),
+          seq(kw("keeping"), kw("target"), kw("lines")),
+        )),
+        ".",
+      ),
+
+    endselect_statement: ($) => seq(kw("endselect"), "."),
+
     // ── Terminals ─────────────────────────────────────────────────
+    // String template: |text {expr} more| — simplified (no embedded expr parsing)
+    string_template: ($) => /\|[^|]*\|/,
+
     _operand: ($) => choice($._escaped_operand, $.name),
     _escaped_operand: ($) => seq("!", $.name),
     numeric_literal: ($) => /[0-9]+/,
