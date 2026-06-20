@@ -1,11 +1,11 @@
 module.exports = grammar({
   name: "abap",
 
-  word: ($) => $.name,
+  word: $ => $.name,
 
-  extras: ($) => [/\s+/, $.eol_comment, $.bol_comment],
+  extras: $ => [/\s+/, $.eol_comment, $.bol_comment],
 
-  conflicts: ($) => [
+  conflicts: $ => [
     // FUNCTION name. body ENDFUNCTION. vs macro_include for the same tokens
     [$.function_implementation, $.macro_include],
     // constructor_expression body: MAPPING/EXCEPT/WHERE clauses vs _general_expression_position
@@ -20,9 +20,9 @@ module.exports = grammar({
   ],
 
   rules: {
-    program: ($) => repeat($._statement),
+    program: $ => repeat($._statement),
 
-    _statement: ($) =>
+    _statement: $ =>
       choice(
         $.class_declaration,
         $.class_implementation,
@@ -37,7 +37,7 @@ module.exports = grammar({
         $._implementation_statement,
       ),
 
-    _implementation_statement: ($) =>
+    _implementation_statement: $ =>
       choice(
         $.variable_declaration,
         $.chained_variable_declaration,
@@ -83,7 +83,7 @@ module.exports = grammar({
         $.endselect_statement,
       ),
 
-    class_declaration: ($) =>
+    class_declaration: $ =>
       seq(
         kw("class"),
         field("name", $.name),
@@ -111,19 +111,19 @@ module.exports = grammar({
         ".",
       ),
 
-    _create_addition: ($) =>
+    _create_addition: $ =>
       seq(kw("create"), choice(kw("public"), kw("protected"), kw("private"))),
 
-    public_section: ($) =>
+    public_section: $ =>
       seq(kw("public"), kw("section"), ".", repeat($._class_components)),
 
-    protected_section: ($) =>
+    protected_section: $ =>
       seq(kw("protected"), kw("section"), ".", repeat($._class_components)),
 
-    private_section: ($) =>
+    private_section: $ =>
       seq(kw("private"), kw("section"), ".", repeat($._class_components)),
 
-    _class_components: ($) =>
+    _class_components: $ =>
       choice(
         $.variable_declaration,
         alias($.method_declaration_class, $.method_declaration),
@@ -133,7 +133,7 @@ module.exports = grammar({
         $.class_constructor_declaration,
       ),
 
-    class_implementation: ($) =>
+    class_implementation: $ =>
       seq(
         kw("class"),
         field("name", $.name),
@@ -144,7 +144,7 @@ module.exports = grammar({
         ".",
       ),
 
-    method_declaration_class: ($) =>
+    method_declaration_class: $ =>
       seq(
         kw("methods"),
         field("name", $.name),
@@ -164,25 +164,24 @@ module.exports = grammar({
         ".",
       ),
 
-    _method_declaration_importing: ($) =>
+    _method_declaration_importing: $ =>
       seq(kw("importing"), repeat1($.method_parameters)),
 
-    _method_declaration_exporting: ($) =>
+    _method_declaration_exporting: $ =>
       seq(kw("exporting"), repeat1($.method_parameters)),
 
-    _method_declaration_changing: ($) =>
+    _method_declaration_changing: $ =>
       seq(kw("changing"), repeat1($.method_parameters)),
 
-    _method_declaration_raising: ($) =>
+    _method_declaration_raising: $ =>
       seq(
         kw("raising"),
         repeat1(choice($.name, seq(kw("resumable"), "(", $.name, ")"))),
       ),
 
-    _method_declaration_exceptions: ($) =>
-      seq(kw("exceptions"), repeat1($.name)),
+    _method_declaration_exceptions: $ => seq(kw("exceptions"), repeat1($.name)),
 
-    method_parameters: ($) =>
+    method_parameters: $ =>
       seq(
         choice(
           seq(kw("value"), "(", $.name, ")"),
@@ -193,10 +192,10 @@ module.exports = grammar({
         optional(choice(kw("optional"), seq(kw("default"), $.name))),
       ),
 
-    returning_parameter: ($) =>
+    returning_parameter: $ =>
       seq(kw("returning"), kw("value"), "(", $.name, ")", $.complete_typing),
 
-    constructor_declaration: ($) =>
+    constructor_declaration: $ =>
       seq(
         kw("methods"),
         kw("constructor"),
@@ -210,10 +209,10 @@ module.exports = grammar({
         ".",
       ),
 
-    class_constructor_declaration: ($) =>
+    class_constructor_declaration: $ =>
       seq(kw("class-methods"), kw("class_constructor"), "."),
 
-    method_redefinition: ($) =>
+    method_redefinition: $ =>
       seq(
         kw("methods"),
         $.name,
@@ -222,7 +221,7 @@ module.exports = grammar({
         ".",
       ),
 
-    class_method_declaration_class: ($) =>
+    class_method_declaration_class: $ =>
       seq(
         kw("class-methods"),
         field("name", $.name),
@@ -241,7 +240,7 @@ module.exports = grammar({
         ".",
       ),
 
-    class_method_declaration_interface: ($) =>
+    class_method_declaration_interface: $ =>
       seq(
         kw("class-methods"),
         field("name", $.name),
@@ -261,7 +260,7 @@ module.exports = grammar({
         ".",
       ),
 
-    method_implementation: ($) =>
+    method_implementation: $ =>
       seq(
         kw("method"),
         field("name", $.name),
@@ -271,9 +270,9 @@ module.exports = grammar({
         ".",
       ),
 
-    method_body: ($) => repeat1($._implementation_statement),
+    method_body: $ => repeat1($._implementation_statement),
 
-    class_publication: ($) =>
+    class_publication: $ =>
       seq(
         kw("class"),
         field("name", $.name),
@@ -283,7 +282,7 @@ module.exports = grammar({
         ".",
       ),
 
-    class_local_friend_publication: ($) =>
+    class_local_friend_publication: $ =>
       seq(
         kw("class"),
         field("name", $.name),
@@ -294,7 +293,7 @@ module.exports = grammar({
         ".",
       ),
 
-    interface_declaration: ($) =>
+    interface_declaration: $ =>
       seq(
         kw("interface"),
         field("name", $.name),
@@ -305,14 +304,14 @@ module.exports = grammar({
         ".",
       ),
 
-    _interface_components: ($) =>
+    _interface_components: $ =>
       choice(
         $.variable_declaration,
         alias($.method_declaration_interface, $.method_declaration),
         alias($.class_method_declaration_interface, $.class_method_declaration),
       ),
 
-    method_declaration_interface: ($) =>
+    method_declaration_interface: $ =>
       seq(
         kw("methods"),
         field("name", $.name),
@@ -332,32 +331,28 @@ module.exports = grammar({
         ".",
       ),
 
-    _typing: ($) => choice($.generic_typing, $.complete_typing),
+    _typing: $ => choice($.generic_typing, $.complete_typing),
 
-    generic_typing: ($) =>
+    generic_typing: $ =>
       choice(seq(kw("type"), $.generic_type), seq(kw("like"), $.name)),
 
-    complete_typing: ($) =>
+    complete_typing: $ =>
       choice(
         seq(kw("type"), alias($.name, $.type)),
         seq(kw("type"), kw("ref"), kw("to"), alias($.name, $.type)),
       ),
 
-    generic_type: ($) =>
-      choice(
-        kw("any"),
-        seq(kw("any"), kw("table")),
-        kw("field-symbol"),
-      ),
+    generic_type: $ =>
+      choice(kw("any"), seq(kw("any"), kw("table")), kw("field-symbol")),
 
-    _data_object_typing: ($) =>
+    _data_object_typing: $ =>
       choice(
         $._data_object_typing_normal,
         $._data_object_typing_reference,
         $._data_object_typing_itabs,
       ),
 
-    _data_object_typing_normal: ($) =>
+    _data_object_typing_normal: $ =>
       seq(
         choice(
           seq(
@@ -373,7 +368,7 @@ module.exports = grammar({
         optional(kw("read-only")),
       ),
 
-    _data_object_typing_reference: ($) =>
+    _data_object_typing_reference: $ =>
       seq(
         choice(
           seq(kw("type"), kw("ref"), kw("to"), alias($.name, $.type)),
@@ -383,7 +378,7 @@ module.exports = grammar({
         optional(kw("read-only")),
       ),
 
-    _data_object_typing_itabs: ($) =>
+    _data_object_typing_itabs: $ =>
       seq(
         choice(
           seq(
@@ -417,7 +412,7 @@ module.exports = grammar({
         ),
       ),
 
-    variable_declaration: ($) =>
+    variable_declaration: $ =>
       seq(
         choice(kw("data"), kw("statics"), kw("class-data")),
         field("name", $.name),
@@ -425,7 +420,7 @@ module.exports = grammar({
         ".",
       ),
 
-    chained_variable_declaration: ($) =>
+    chained_variable_declaration: $ =>
       seq(
         choice(kw("data"), kw("statics"), kw("class-data")),
         ":",
@@ -433,9 +428,9 @@ module.exports = grammar({
         ".",
       ),
 
-    variable: ($) => seq($.name, alias($._data_object_typing, $.typing)),
+    variable: $ => seq($.name, alias($._data_object_typing, $.typing)),
 
-    chained_structure_declaration: ($) =>
+    chained_structure_declaration: $ =>
       seq(
         choice(kw("data"), kw("statics"), kw("class-data")),
         ":",
@@ -451,9 +446,9 @@ module.exports = grammar({
         ".",
       ),
 
-    structure_component: ($) => seq($.name, $._typing, ","),
+    structure_component: $ => seq($.name, $._typing, ","),
 
-    field_symbol_declaration: ($) =>
+    field_symbol_declaration: $ =>
       seq(
         kw("field-symbols"),
         alias($.field_symbol_name, $.name),
@@ -461,7 +456,7 @@ module.exports = grammar({
         ".",
       ),
 
-    chained_field_symbol_declaration: ($) =>
+    chained_field_symbol_declaration: $ =>
       seq(
         kw("field-symbols"),
         ":",
@@ -469,16 +464,25 @@ module.exports = grammar({
         ".",
       ),
 
-    field_symbol: ($) => seq(alias($.field_symbol_name, $.name), $._typing),
+    field_symbol: $ => seq(alias($.field_symbol_name, $.name), $._typing),
 
-    loop_statement: ($) =>
+    loop_statement: $ =>
       seq(
         kw("loop"),
         kw("at"),
         alias($.name, $.itab),
         choice(
-          seq(kw("into"), choice($.inline_declaration, alias($.name, $.result))),
-          seq(kw("assigning"), choice($.inline_fs_declaration, alias($.field_symbol_name, $.result))),
+          seq(
+            kw("into"),
+            choice($.inline_declaration, alias($.name, $.result)),
+          ),
+          seq(
+            kw("assigning"),
+            choice(
+              $.inline_fs_declaration,
+              alias($.field_symbol_name, $.result),
+            ),
+          ),
         ),
         optional(
           seq(
@@ -493,12 +497,12 @@ module.exports = grammar({
         ".",
       ),
 
-    exit_statement: ($) => seq(kw("exit"), "."),
-    continue_statement: ($) => seq(kw("continue"), "."),
-    return_statement: ($) => seq(kw("return"), "."),
-    report_statement: ($) => seq(kw("report"), $.name, "."),
+    exit_statement: $ => seq(kw("exit"), "."),
+    continue_statement: $ => seq(kw("continue"), "."),
+    return_statement: $ => seq(kw("return"), "."),
+    report_statement: $ => seq(kw("report"), $.name, "."),
 
-    if_statement: ($) =>
+    if_statement: $ =>
       seq(
         kw("if"),
         $._logical_expression,
@@ -512,9 +516,9 @@ module.exports = grammar({
         ".",
       ),
 
-    check_statement: ($) => seq(kw("check"), $._logical_expression, "."),
+    check_statement: $ => seq(kw("check"), $._logical_expression, "."),
 
-    _logical_expression: ($) =>
+    _logical_expression: $ =>
       choice(
         $.comparison_expression,
         $.predicate_call,
@@ -534,7 +538,7 @@ module.exports = grammar({
       ),
 
     // Predicate function call: line_exists( ... ), xsdbool( ... ), etc.
-    predicate_call: ($) =>
+    predicate_call: $ =>
       seq(
         field("name", $.name),
         "(",
@@ -542,14 +546,14 @@ module.exports = grammar({
         ")",
       ),
 
-    comparison_expression: ($) =>
+    comparison_expression: $ =>
       seq(
         $._general_expression_position,
         choice("=", kw("eq"), "<>", kw("ne")),
         $._general_expression_position,
       ),
 
-    _general_expression_position: ($) =>
+    _general_expression_position: $ =>
       choice(
         $.numeric_literal,
         $.character_literal,
@@ -562,9 +566,9 @@ module.exports = grammar({
         $.table_expression,
       ),
 
-    _calculation_expression: ($) => choice($.arithmetic_expression),
+    _calculation_expression: $ => choice($.arithmetic_expression),
 
-    arithmetic_expression: ($) =>
+    arithmetic_expression: $ =>
       choice(
         prec.left(
           1,
@@ -633,10 +637,10 @@ module.exports = grammar({
         ),
       ),
 
-    _writeable_expression: ($) =>
+    _writeable_expression: $ =>
       choice($.inline_declaration, $.table_expression),
 
-    table_expression: ($) =>
+    table_expression: $ =>
       seq(
         field("itab", $.name),
         token.immediate("[ "),
@@ -650,9 +654,9 @@ module.exports = grammar({
         "]",
       ),
 
-    _table_expression_free_key: ($) => repeat1($.comp_spec),
+    _table_expression_free_key: $ => repeat1($.comp_spec),
 
-    comp_spec: ($) =>
+    comp_spec: $ =>
       seq(
         field("component", $.name),
         "=",
@@ -660,9 +664,9 @@ module.exports = grammar({
       ),
 
     // ── SELECT ────────────────────────────────────────────────────
-    select_modifier: ($) => choice(kw("single"), kw("distinct")),
+    select_modifier: $ => choice(kw("single"), kw("distinct")),
 
-    select_statement_obsolete: ($) =>
+    select_statement_obsolete: $ =>
       seq(
         kw("select"),
         optional($.select_modifier),
@@ -670,7 +674,14 @@ module.exports = grammar({
         choice(
           // Style A: SELECT fields FROM table [JOIN...] INTO target ...
           seq(
-            optional(seq(kw("up"), kw("to"), $._general_expression_position, kw("rows"))),
+            optional(
+              seq(
+                kw("up"),
+                kw("to"),
+                $._general_expression_position,
+                kw("rows"),
+              ),
+            ),
             kw("from"),
             seq(alias($.name, $.data_source), repeat($.sql_join)),
             alias($._select_target, $.target),
@@ -678,7 +689,14 @@ module.exports = grammar({
           // Style B: SELECT fields INTO target UP TO n ROWS FROM table [JOIN...]
           seq(
             alias($._select_target, $.target),
-            optional(seq(kw("up"), kw("to"), $._general_expression_position, kw("rows"))),
+            optional(
+              seq(
+                kw("up"),
+                kw("to"),
+                $._general_expression_position,
+                kw("rows"),
+              ),
+            ),
             kw("from"),
             seq(alias($.name, $.data_source), repeat($.sql_join)),
           ),
@@ -692,7 +710,12 @@ module.exports = grammar({
             kw("by"),
             choice(
               seq(kw("primary"), kw("key")),
-              repeat1(seq($.name, optional(choice(kw("ascending"), kw("descending"))))),
+              repeat1(
+                seq(
+                  $.name,
+                  optional(choice(kw("ascending"), kw("descending"))),
+                ),
+              ),
             ),
           ),
         ),
@@ -700,77 +723,74 @@ module.exports = grammar({
       ),
 
     // Field list: *, name, name AS alias, table~field, CASE...END, (arithmetic)
-    select_list: ($) => choice(
-      "*",
-      seq($.sql_field, repeat(seq(",", $.sql_field))),
-    ),
+    select_list: $ =>
+      choice("*", seq($.sql_field, repeat(seq(",", $.sql_field)))),
 
     // A single field in the SELECT list
-    sql_field: ($) => seq(
-      choice(
-        $.sql_case_expr,
-        $.sql_arith_group,
-        seq($.name, "~", choice("*", $.name)),
-        $.name,
-        "*",
+    sql_field: $ =>
+      seq(
+        choice(
+          $.sql_case_expr,
+          $.sql_arith_group,
+          seq($.name, "~", choice("*", $.name)),
+          $.name,
+        ),
+        optional(seq(kw("as"), $.name)),
       ),
-      optional(seq(kw("as"), $.name)),
-    ),
 
     // Inline SQL CASE: CASE WHEN cond THEN val ... [ELSE val] END
-    sql_case_expr: ($) => seq(
-      kw("case"),
-      repeat1(seq(kw("when"), $._sql_condition, kw("then"), $._sql_value)),
-      optional(seq(kw("else"), $._sql_value)),
-      kw("end"),
-    ),
+    sql_case_expr: $ =>
+      seq(
+        kw("case"),
+        repeat1(seq(kw("when"), $._sql_condition, kw("then"), $._sql_value)),
+        optional(seq(kw("else"), $._sql_value)),
+        kw("end"),
+      ),
 
-    _sql_value: ($) => choice(
-      $.host_variable,
-      $.character_literal,
-      $.numeric_literal,
-      seq($.name, "~", $.name),
-      $.name,
-    ),
+    _sql_value: $ =>
+      choice(
+        $.host_variable,
+        $.character_literal,
+        $.numeric_literal,
+        seq($.name, "~", $.name),
+        $.name,
+      ),
 
     // SQL arithmetic group: ( expr OP expr ), supports nesting
-    sql_arith_group: ($) => seq(
-      "(",
-      $._sql_arith_term,
-      repeat(seq(choice("+", "-", "*", "/"), $._sql_arith_term)),
-      ")",
-    ),
+    sql_arith_group: $ =>
+      seq(
+        "(",
+        $._sql_arith_term,
+        repeat(seq(choice("+", "-", "*", "/"), $._sql_arith_term)),
+        ")",
+      ),
 
-    _sql_arith_term: ($) => choice(
-      $.sql_arith_group,
-      $.host_variable,
-      $.numeric_literal,
-      seq($.name, "~", $.name),
-      $.name,
-    ),
+    _sql_arith_term: $ =>
+      choice(
+        $.sql_arith_group,
+        $.host_variable,
+        $.numeric_literal,
+        seq($.name, "~", $.name),
+        $.name,
+      ),
 
     // JOIN clause: [INNER|LEFT|RIGHT|CROSS] JOIN table ON cond [AND cond ...]
-    sql_join: ($) => seq(
-      optional(choice(kw("inner"), kw("left"), kw("right"), kw("cross"))),
-      kw("join"),
-      alias($.name, $.data_source),
-      kw("on"),
-      $.sql_join_cond,
-      repeat(seq(choice(kw("and"), kw("or")), $.sql_join_cond)),
-    ),
+    sql_join: $ =>
+      seq(
+        optional(choice(kw("inner"), kw("left"), kw("right"), kw("cross"))),
+        kw("join"),
+        alias($.name, $.data_source),
+        kw("on"),
+        $.sql_join_cond,
+        repeat(seq(choice(kw("and"), kw("or")), $.sql_join_cond)),
+      ),
 
-    sql_join_cond: ($) => seq(
-      $._sql_qualified_name,
-      "=",
-      $._sql_qualified_name,
-    ),
+    sql_join_cond: $ => seq($._sql_qualified_name, "=", $._sql_qualified_name),
 
-    _sql_qualified_name: ($) => choice(
-      seq($.name, "~", choice("*", $.name)),
-      $.name,
-    ),
+    _sql_qualified_name: $ =>
+      choice(seq($.name, "~", choice("*", $.name)), $.name),
 
-    _select_target: ($) =>
+    _select_target: $ =>
       choice(
         seq(kw("into"), "(", repeat1(seq(optional(","), $._host_var)), ")"),
         seq(
@@ -786,20 +806,20 @@ module.exports = grammar({
         ),
       ),
 
-    _host_var: ($) =>
+    _host_var: $ =>
       seq(optional("@"), choice($.inline_declaration, $._data_object)),
 
-    host_variable: ($) => seq("@", $._data_object),
+    host_variable: $ => seq("@", $._data_object),
 
-    for_all_entries: ($) =>
+    for_all_entries: $ =>
       seq(kw("for"), kw("all"), kw("entries"), kw("in"), $.name),
 
-    _where_clause: ($) => seq(kw("where"), $._sql_condition),
+    _where_clause: $ => seq(kw("where"), $._sql_condition),
 
-    _sql_condition: ($) => $._logical_expression,
+    _sql_condition: $ => $._logical_expression,
 
     // ── READ TABLE ────────────────────────────────────────────────
-    read_table_statement: ($) =>
+    read_table_statement: $ =>
       seq(
         kw("read"),
         kw("table"),
@@ -807,13 +827,21 @@ module.exports = grammar({
         choice(
           seq($.line_spec, $._read_table_result),
           seq($._read_table_result, $.line_spec),
-          seq(kw("index"), $._general_expression_position, optional($._read_table_result)),
-          seq($._read_table_result, kw("index"), $._general_expression_position),
+          seq(
+            kw("index"),
+            $._general_expression_position,
+            optional($._read_table_result),
+          ),
+          seq(
+            $._read_table_result,
+            kw("index"),
+            $._general_expression_position,
+          ),
         ),
         ".",
       ),
 
-    line_spec: ($) =>
+    line_spec: $ =>
       seq(
         kw("with"),
         kw("key"),
@@ -821,14 +849,17 @@ module.exports = grammar({
         optional(seq(kw("binary"), kw("search"))),
       ),
 
-    _read_table_result: ($) =>
+    _read_table_result: $ =>
       choice(
         seq(kw("into"), choice($.inline_declaration, $.name)),
-        seq(kw("assigning"), choice($.inline_fs_declaration, $.field_symbol_name)),
+        seq(
+          kw("assigning"),
+          choice($.inline_fs_declaration, $.field_symbol_name),
+        ),
         seq(kw("transporting"), kw("no"), kw("fields")),
       ),
 
-    _data_object: ($) =>
+    _data_object: $ =>
       choice(
         $.name,
         $.field_symbol_name,
@@ -836,20 +867,20 @@ module.exports = grammar({
         $.attribute_access_static,
       ),
 
-    structured_data_object: ($) =>
+    structured_data_object: $ =>
       seq(
         alias(choice($.name, $.field_symbol_name), $.structure_name),
         repeat1(seq(token.immediate("-"), alias($.name, $.component_name))),
       ),
 
-    attribute_access_static: ($) =>
+    attribute_access_static: $ =>
       seq(
         field("class", $.name),
         token.immediate("=>"),
         field("attribute", $.name),
       ),
 
-    assignment: ($) =>
+    assignment: $ =>
       seq(
         choice($._data_object, $._writeable_expression),
         "=",
@@ -857,7 +888,7 @@ module.exports = grammar({
         ".",
       ),
 
-    try_catch_statement: ($) =>
+    try_catch_statement: $ =>
       seq(
         kw("try"),
         ".",
@@ -867,9 +898,9 @@ module.exports = grammar({
         ".",
       ),
 
-    try_block: ($) => repeat1($._statement),
+    try_block: $ => repeat1($._statement),
 
-    catch_statement: ($) =>
+    catch_statement: $ =>
       seq(
         kw("catch"),
         field("exception", $.name),
@@ -878,12 +909,12 @@ module.exports = grammar({
         optional($.catch_block),
       ),
 
-    catch_block: ($) => repeat1($._statement),
+    catch_block: $ => repeat1($._statement),
 
-    write_statement: ($) =>
+    write_statement: $ =>
       seq(kw("write"), optional("/"), $._general_expression_position, "."),
 
-    chained_write_statement: ($) =>
+    chained_write_statement: $ =>
       seq(
         kw("write"),
         ":",
@@ -897,7 +928,7 @@ module.exports = grammar({
         ".",
       ),
 
-    call_method: ($) =>
+    call_method: $ =>
       seq(
         field("name", $.name),
         token.immediate("("),
@@ -915,9 +946,9 @@ module.exports = grammar({
         ".",
       ),
 
-    parameter_list: ($) => repeat1($.parameter_binding),
+    parameter_list: $ => repeat1($.parameter_binding),
 
-    _explicit_parameter_list: ($) =>
+    _explicit_parameter_list: $ =>
       seq(
         repeat1(
           choice(
@@ -929,24 +960,24 @@ module.exports = grammar({
         ),
       ),
 
-    parameter_list_exporting: ($) =>
+    parameter_list_exporting: $ =>
       repeat1(alias($.parameter_binding_exporting, $.parameter_binding)),
 
-    parameter_binding: ($) =>
+    parameter_binding: $ =>
       seq(
         field("formal_parameter", $.name),
         "=",
         field("actual_parameter", $._general_expression_position),
       ),
 
-    parameter_binding_exporting: ($) =>
+    parameter_binding_exporting: $ =>
       seq(
         field("formal_parameter", $.name),
         "=",
         field("actual_parameter", $.name),
       ),
 
-    call_method_static: ($) =>
+    call_method_static: $ =>
       seq(
         field("class_name", $.name),
         token.immediate("=>"),
@@ -966,7 +997,7 @@ module.exports = grammar({
         ".",
       ),
 
-    call_method_instance: ($) =>
+    call_method_instance: $ =>
       seq(
         field("instance_name", $.name),
         token.immediate("->"),
@@ -986,7 +1017,7 @@ module.exports = grammar({
         ".",
       ),
 
-    call_function: ($) =>
+    call_function: $ =>
       seq(
         kw("call"),
         kw("function"),
@@ -996,7 +1027,7 @@ module.exports = grammar({
         ".",
       ),
 
-    _function_parameter_list: ($) =>
+    _function_parameter_list: $ =>
       repeat1(
         choice(
           seq(
@@ -1009,17 +1040,16 @@ module.exports = grammar({
         ),
       ),
 
-    exception_list: ($) =>
-      seq(kw("exceptions"), repeat1($.return_code_binding)),
+    exception_list: $ => seq(kw("exceptions"), repeat1($.return_code_binding)),
 
-    return_code_binding: ($) =>
+    return_code_binding: $ =>
       seq(
         field("exception", $.name),
         "=",
         field("return_code", $.numeric_literal),
       ),
 
-    raise_exception_statement: ($) =>
+    raise_exception_statement: $ =>
       seq(
         kw("raise"),
         kw("exception"),
@@ -1036,10 +1066,10 @@ module.exports = grammar({
         ".",
       ),
 
-    clear_statement: ($) => seq(kw("clear"), $._data_object, "."),
+    clear_statement: $ => seq(kw("clear"), $._data_object, "."),
 
     // ── APPEND ────────────────────────────────────────────────────
-    append_statement: ($) =>
+    append_statement: $ =>
       seq(
         kw("append"),
         choice(
@@ -1062,10 +1092,10 @@ module.exports = grammar({
         ".",
       ),
 
-    append_statement_obsolete: ($) =>
+    append_statement_obsolete: $ =>
       seq(kw("append"), field("itab", $.name), "."),
 
-    create_object_statement: ($) =>
+    create_object_statement: $ =>
       seq(
         kw("create"),
         kw("object"),
@@ -1074,7 +1104,7 @@ module.exports = grammar({
         ".",
       ),
 
-    include_statement: ($) =>
+    include_statement: $ =>
       seq(
         kw("include"),
         choice($.name, $.field_symbol_name),
@@ -1082,7 +1112,7 @@ module.exports = grammar({
         ".",
       ),
 
-    macro_include: ($) =>
+    macro_include: $ =>
       seq(
         field("name", $.name),
         optional(
@@ -1091,8 +1121,9 @@ module.exports = grammar({
         ".",
       ),
 
-    function_implementation: ($) =>
-      prec.dynamic(1,
+    function_implementation: $ =>
+      prec.dynamic(
+        1,
         seq(
           kw("function"),
           field("name", $.name),
@@ -1103,11 +1134,11 @@ module.exports = grammar({
         ),
       ),
 
-    function_end: ($) => prec.dynamic(1, kw("endfunction")),
+    function_end: $ => prec.dynamic(1, kw("endfunction")),
 
-    raise_statement: ($) => seq(kw("raise"), $.name, "."),
+    raise_statement: $ => seq(kw("raise"), $.name, "."),
 
-    sort_statement: ($) =>
+    sort_statement: $ =>
       seq(
         kw("sort"),
         $.name,
@@ -1122,7 +1153,7 @@ module.exports = grammar({
         ".",
       ),
 
-    case_statement: ($) =>
+    case_statement: $ =>
       seq(
         kw("case"),
         $._general_expression_position,
@@ -1132,7 +1163,7 @@ module.exports = grammar({
         ".",
       ),
 
-    when_clause: ($) =>
+    when_clause: $ =>
       seq(
         kw("when"),
         choice(
@@ -1149,7 +1180,7 @@ module.exports = grammar({
         repeat($._implementation_statement),
       ),
 
-    concatenate_statement: ($) =>
+    concatenate_statement: $ =>
       seq(
         kw("concatenate"),
         repeat1($._data_object),
@@ -1161,7 +1192,7 @@ module.exports = grammar({
         ".",
       ),
 
-    condense_statement: ($) =>
+    condense_statement: $ =>
       seq(
         kw("condense"),
         $._data_object,
@@ -1169,7 +1200,7 @@ module.exports = grammar({
         ".",
       ),
 
-    replace_statement: ($) =>
+    replace_statement: $ =>
       seq(
         kw("replace"),
         optional(choice(kw("first"), kw("all"))),
@@ -1183,7 +1214,7 @@ module.exports = grammar({
         ".",
       ),
 
-    delete_statement: ($) =>
+    delete_statement: $ =>
       seq(
         kw("delete"),
         choice(
@@ -1200,21 +1231,17 @@ module.exports = grammar({
         ".",
       ),
 
-    collect_statement: ($) =>
-      seq(kw("collect"), $.name, kw("into"), $.name, "."),
+    collect_statement: $ => seq(kw("collect"), $.name, kw("into"), $.name, "."),
 
     // ── Report / selection-screen constructs ──────────────────────
-    tables_statement: ($) =>
+    tables_statement: $ =>
       seq(
         kw("tables"),
-        choice(
-          seq(":", repeat1(choice($.name, seq(",", $.name)))),
-          $.name,
-        ),
+        choice(seq(":", repeat1(choice($.name, seq(",", $.name)))), $.name),
         ".",
       ),
 
-    selection_screen_statement: ($) =>
+    selection_screen_statement: $ =>
       seq(
         kw("selection-screen"),
         choice(
@@ -1233,14 +1260,23 @@ module.exports = grammar({
           ),
           seq(kw("end"), kw("of"), kw("block"), $.name),
           seq(kw("skip"), optional($.numeric_literal)),
-          seq(kw("comment"), $._general_expression_position, optional(seq(kw("for"), kw("field"), $.name))),
-          seq(kw("pushbutton"), $._general_expression_position, $.name, optional(seq(kw("user-command"), $.name))),
+          seq(
+            kw("comment"),
+            $._general_expression_position,
+            optional(seq(kw("for"), kw("field"), $.name)),
+          ),
+          seq(
+            kw("pushbutton"),
+            $._general_expression_position,
+            $.name,
+            optional(seq(kw("user-command"), $.name)),
+          ),
           $._general_expression_position,
         ),
         ".",
       ),
 
-    at_selection_screen_statement: ($) =>
+    at_selection_screen_statement: $ =>
       seq(
         kw("at"),
         kw("selection-screen"),
@@ -1255,7 +1291,7 @@ module.exports = grammar({
         ".",
       ),
 
-    parameters_statement: ($) =>
+    parameters_statement: $ =>
       seq(
         kw("parameters"),
         choice(
@@ -1265,7 +1301,7 @@ module.exports = grammar({
         ".",
       ),
 
-    parameter_def: ($) =>
+    parameter_def: $ =>
       seq(
         $.name,
         optional($._data_object_typing_normal),
@@ -1285,7 +1321,7 @@ module.exports = grammar({
         ),
       ),
 
-    translate_statement: ($) =>
+    translate_statement: $ =>
       seq(
         kw("translate"),
         $._data_object,
@@ -1294,27 +1330,24 @@ module.exports = grammar({
         ".",
       ),
 
-    split_statement: ($) =>
+    split_statement: $ =>
       seq(
         kw("split"),
         $._general_expression_position,
         kw("at"),
         $._general_expression_position,
         kw("into"),
-        choice(
-          seq(kw("table"), $._data_object),
-          repeat1($._data_object),
-        ),
+        choice(seq(kw("table"), $._data_object), repeat1($._data_object)),
         ".",
       ),
 
     // ── Inline declaration & constructor expressions ───────────────
-    inline_declaration: ($) => seq(kw("data"), "(", field("name", $.name), ")"),
+    inline_declaration: $ => seq(kw("data"), "(", field("name", $.name), ")"),
 
-    inline_fs_declaration: ($) =>
+    inline_fs_declaration: $ =>
       seq(kw("field-symbol"), "(", $.field_symbol_name, ")"),
 
-    constructor_expression: ($) =>
+    constructor_expression: $ =>
       seq(
         choice(
           kw("cond"),
@@ -1346,7 +1379,7 @@ module.exports = grammar({
       ),
 
     // ELSE value  /  ELSE THROW cx_exception( )
-    constructor_else_clause: ($) =>
+    constructor_else_clause: $ =>
       seq(
         kw("else"),
         choice(
@@ -1356,32 +1389,32 @@ module.exports = grammar({
       ),
 
     // FOR x IN itab [WHERE ( cond )] — used inside VALUE/REDUCE/FILTER
-    constructor_for_clause: ($) =>
-      prec.left(seq(
-        kw("for"),
-        $.name,
-        kw("in"),
-        $._general_expression_position,
-        optional(seq(kw("where"), "(", $._constructor_condition, ")")),
-      )),
+    constructor_for_clause: $ =>
+      prec.left(
+        seq(
+          kw("for"),
+          $.name,
+          kw("in"),
+          $._general_expression_position,
+          optional(seq(kw("where"), "(", $._constructor_condition, ")")),
+        ),
+      ),
 
     // CORRESPONDING #( src MAPPING a = b c = d )
-    constructor_mapping_clause: ($) =>
+    constructor_mapping_clause: $ =>
       prec.left(seq(kw("mapping"), repeat1($.comp_spec))),
 
     // CORRESPONDING #( src EXCEPT field )
-    constructor_except_clause: ($) =>
+    constructor_except_clause: $ =>
       prec.left(seq(kw("except"), repeat1($.name))),
 
     // FILTER #( itab USING KEY keyname ... )
-    constructor_using_key_clause: ($) =>
-      seq(kw("using"), kw("key"), $.name),
+    constructor_using_key_clause: $ => seq(kw("using"), kw("key"), $.name),
 
     // FILTER #( itab ... WHERE cond )
-    constructor_where_clause: ($) =>
-      seq(kw("where"), $._constructor_condition),
+    constructor_where_clause: $ => seq(kw("where"), $._constructor_condition),
 
-    constructor_when_clause: ($) =>
+    constructor_when_clause: $ =>
       seq(
         kw("when"),
         $._constructor_condition,
@@ -1389,7 +1422,7 @@ module.exports = grammar({
         $._general_expression_position,
       ),
 
-    _constructor_condition: ($) =>
+    _constructor_condition: $ =>
       choice(
         prec.left(
           2,
@@ -1405,43 +1438,50 @@ module.exports = grammar({
       ),
 
     // ── ABAP 7.4 statements ───────────────────────────────────────
-    assign_statement: ($) =>
+    assign_statement: $ =>
       seq(
         kw("assign"),
         $._general_expression_position,
         kw("to"),
         choice($.inline_fs_declaration, $.field_symbol_name),
-        optional(seq(kw("casting"), optional(seq(kw("like"), $._general_expression_position)))),
+        optional(
+          seq(
+            kw("casting"),
+            optional(seq(kw("like"), $._general_expression_position)),
+          ),
+        ),
         ".",
       ),
 
-    move_corresponding_statement: ($) =>
+    move_corresponding_statement: $ =>
       seq(
         kw("move-corresponding"),
         $._data_object,
         kw("to"),
         $._data_object,
-        repeat(choice(
-          seq(kw("expanding"), kw("nested"), kw("tables")),
-          seq(kw("keeping"), kw("target"), kw("lines")),
-        )),
+        repeat(
+          choice(
+            seq(kw("expanding"), kw("nested"), kw("tables")),
+            seq(kw("keeping"), kw("target"), kw("lines")),
+          ),
+        ),
         ".",
       ),
 
-    endselect_statement: ($) => seq(kw("endselect"), "."),
+    endselect_statement: $ => seq(kw("endselect"), "."),
 
     // ── Terminals ─────────────────────────────────────────────────
-    string_template: ($) => /\|[^|]*\|/,
+    string_template: $ => /\|[^|]*\|/,
 
-    _operand: ($) => choice($._escaped_operand, $.name),
-    _escaped_operand: ($) => seq("!", $.name),
-    numeric_literal: ($) => /[0-9]+/,
-    character_literal: ($) => /'[^']*'/,
-    text_symbol: ($) => /text-[a-z0-9]{3}/i,
-    eol_comment: ($) => seq('"', /[^\n]*/),
-    bol_comment: ($) => seq("*", /[^\n]*/),
-    name: ($) => /[a-zA-Z_][a-zA-Z0-9_]{0,29}/i,
-    field_symbol_name: ($) => /<[a-zA-Z0-9_]{0,28}>/i,
+    _operand: $ => choice($._escaped_operand, $.name),
+    _escaped_operand: $ => seq("!", $.name),
+    numeric_literal: $ => /[0-9]+/,
+    character_literal: $ => /'[^']*'/,
+    text_symbol: $ => /text-[a-z0-9]{3}/i,
+    eol_comment: $ => seq('"', /[^\n]*/),
+    bol_comment: $ => seq("*", /[^\n]*/),
+    name: $ => /[a-zA-Z_][a-zA-Z0-9_]{0,29}/i,
+    field_symbol_name: $ => /<[a-zA-Z0-9_]{0,28}>/i,
   },
 });
 
@@ -1452,4 +1492,3 @@ module.exports = grammar({
 function kw(word) {
   return alias(new RegExp(word, "i"), word);
 }
-
