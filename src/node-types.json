@@ -1819,6 +1819,11 @@
     }
   },
   {
+    "type": "function_end",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "function_implementation",
     "named": true,
     "fields": {
@@ -1835,7 +1840,7 @@
     },
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "append_statement",
@@ -1923,6 +1928,10 @@
         },
         {
           "type": "field_symbol_declaration",
+          "named": true
+        },
+        {
+          "type": "function_end",
           "named": true
         },
         {
@@ -5563,11 +5572,11 @@
   },
   {
     "type": "type",
-    "named": false
+    "named": true
   },
   {
     "type": "type",
-    "named": true
+    "named": false
   },
   {
     "type": "unique",

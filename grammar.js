@@ -990,14 +990,18 @@ module.exports = grammar({
       ),
 
     function_implementation: ($) =>
-      seq(
-        kw("function"),
-        field("name", $.name),
-        ".",
-        repeat($._implementation_statement),
-        kw("endfunction"),
-        ".",
+      prec.dynamic(1,
+        seq(
+          kw("function"),
+          field("name", $.name),
+          ".",
+          repeat($._implementation_statement),
+          $.function_end,
+          ".",
+        ),
       ),
+
+    function_end: ($) => prec.dynamic(1, kw("endfunction")),
 
     raise_statement: ($) => seq(kw("raise"), $.name, "."),
 

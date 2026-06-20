@@ -6821,52 +6821,64 @@
       ]
     },
     "function_implementation": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "ALIAS",
-          "content": {
-            "type": "PATTERN",
-            "value": "function",
-            "flags": "i"
+      "type": "PREC_DYNAMIC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "PATTERN",
+              "value": "function",
+              "flags": "i"
+            },
+            "named": false,
+            "value": "function"
           },
-          "named": false,
-          "value": "function"
-        },
-        {
-          "type": "FIELD",
-          "name": "name",
-          "content": {
-            "type": "SYMBOL",
-            "name": "name"
-          }
-        },
-        {
-          "type": "STRING",
-          "value": "."
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "SYMBOL",
-            "name": "_implementation_statement"
-          }
-        },
-        {
-          "type": "ALIAS",
-          "content": {
-            "type": "PATTERN",
-            "value": "endfunction",
-            "flags": "i"
+          {
+            "type": "FIELD",
+            "name": "name",
+            "content": {
+              "type": "SYMBOL",
+              "name": "name"
+            }
           },
-          "named": false,
-          "value": "endfunction"
+          {
+            "type": "STRING",
+            "value": "."
+          },
+          {
+            "type": "REPEAT",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_implementation_statement"
+            }
+          },
+          {
+            "type": "SYMBOL",
+            "name": "function_end"
+          },
+          {
+            "type": "STRING",
+            "value": "."
+          }
+        ]
+      }
+    },
+    "function_end": {
+      "type": "PREC_DYNAMIC",
+      "value": 1,
+      "content": {
+        "type": "ALIAS",
+        "content": {
+          "type": "PATTERN",
+          "value": "endfunction",
+          "flags": "i"
         },
-        {
-          "type": "STRING",
-          "value": "."
-        }
-      ]
+        "named": false,
+        "value": "endfunction"
+      }
     },
     "raise_statement": {
       "type": "SEQ",
