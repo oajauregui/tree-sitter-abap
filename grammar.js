@@ -672,7 +672,7 @@ module.exports = grammar({
         optional($.select_modifier),
         $.select_list,
         choice(
-          // Style A: SELECT fields FROM table [JOIN...] INTO target ...
+          // Style A: SELECT fields FROM table [JOIN...] [WHERE cond] INTO target
           seq(
             optional(
               seq(
@@ -684,9 +684,12 @@ module.exports = grammar({
             ),
             kw("from"),
             seq(alias($.name, $.data_source), repeat($.sql_join)),
+            optional(
+              seq(optional($.for_all_entries), alias($._where_clause, $.where)),
+            ),
             alias($._select_target, $.target),
           ),
-          // Style B: SELECT fields INTO target UP TO n ROWS FROM table [JOIN...]
+          // Style B: SELECT fields INTO target [UP TO n ROWS] FROM table [WHERE cond]
           seq(
             alias($._select_target, $.target),
             optional(
@@ -699,10 +702,10 @@ module.exports = grammar({
             ),
             kw("from"),
             seq(alias($.name, $.data_source), repeat($.sql_join)),
+            optional(
+              seq(optional($.for_all_entries), alias($._where_clause, $.where)),
+            ),
           ),
-        ),
-        optional(
-          seq(optional($.for_all_entries), alias($._where_clause, $.where)),
         ),
         optional(
           seq(
