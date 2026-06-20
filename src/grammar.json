@@ -8960,7 +8960,7 @@
     },
     "character_literal": {
       "type": "PATTERN",
-      "value": "'[^']+'"
+      "value": "'[^']*'"
     },
     "text_symbol": {
       "type": "PATTERN",
